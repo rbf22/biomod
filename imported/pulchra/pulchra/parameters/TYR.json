@@ -1,0 +1,16 @@
+{
+    "name": "TYR",
+    "short_name": "Y",
+    "num_heavy_atoms": 8,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD1",
+        "CD2",
+        "CE1",
+        "CE2",
+        "CZ",
+        "OH"
+    ],
+    "hydrogens": []
+}

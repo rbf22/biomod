@@ -1,0 +1,13 @@
+{
+    "name": "GLN",
+    "short_name": "Q",
+    "num_heavy_atoms": 5,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD",
+        "OE1",
+        "NE2"
+    ],
+    "hydrogens": []
+}

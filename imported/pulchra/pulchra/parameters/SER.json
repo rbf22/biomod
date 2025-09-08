@@ -1,0 +1,10 @@
+{
+    "name": "SER",
+    "short_name": "S",
+    "num_heavy_atoms": 2,
+    "heavy_atom_names": [
+        "CB",
+        "OG"
+    ],
+    "hydrogens": []
+}

@@ -1,0 +1,12 @@
+{
+    "name": "MET",
+    "short_name": "M",
+    "num_heavy_atoms": 4,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "SD",
+        "CE"
+    ],
+    "hydrogens": []
+}

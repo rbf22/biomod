@@ -1,0 +1,11 @@
+{
+    "name": "VAL",
+    "short_name": "V",
+    "num_heavy_atoms": 3,
+    "heavy_atom_names": [
+        "CB",
+        "CG1",
+        "CG2"
+    ],
+    "hydrogens": []
+}

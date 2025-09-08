@@ -1,0 +1,12 @@
+{
+    "name": "ILE",
+    "short_name": "I",
+    "num_heavy_atoms": 4,
+    "heavy_atom_names": [
+        "CB",
+        "CG1",
+        "CG2",
+        "CD1"
+    ],
+    "hydrogens": []
+}

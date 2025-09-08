@@ -1,0 +1,72 @@
+[tool.poetry]
+name = "atomium"
+version = "1.0.11"
+description = "A molecular modeller and file parser."
+authors = ["Sam Ireland <mail@samireland.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://atomium.samireland.com"
+repository = "https://github.com/SamIreland/atomium"
+keywords = ["chemistry", "bioinformatics", "proteins", "biochemistry", "molecules", "PDB", "MMCIF", "CIF", "MMTF"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+numpy = "*"
+requests = "*"
+rmsd = "*"
+paramiko = "*"
+msgpack = "*"
+valerius = "*"
+
+[tool.poetry.group.dev.dependencies]
+python-coveralls = "*"
+sphinx = "*"
+sphinx_rtd_theme = "*"
+tqdm = "*"
+pytest = "*"
+ruff = "*"
+pylint = "*"
+mypy = "*"
+deptry = "*"
+matplotlib = "*"
+biopython = "*"
+pytest-cov = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.deptry]
+extend_exclude = ["scripts"]
+ignore = ["DEP003"]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = [
+    "rmsd",
+    "scipy.spatial.distance",
+    "valerius",
+    "msgpack",
+    "paramiko",
+    "requests"
+]
+ignore_missing_imports = true
+
+[tool.pylint.messages_control]
+disable = [
+    "E1101",
+    "E1135",
+    "E1133",
+    "E1136",
+]

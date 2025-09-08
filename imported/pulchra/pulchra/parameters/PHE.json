@@ -1,0 +1,15 @@
+{
+    "name": "PHE",
+    "short_name": "F",
+    "num_heavy_atoms": 7,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD1",
+        "CD2",
+        "CE1",
+        "CE2",
+        "CZ"
+    ],
+    "hydrogens": []
+}

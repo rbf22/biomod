@@ -1,0 +1,13 @@
+{
+    "name": "LYS",
+    "short_name": "K",
+    "num_heavy_atoms": 5,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD",
+        "CE",
+        "NZ"
+    ],
+    "hydrogens": []
+}

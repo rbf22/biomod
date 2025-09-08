@@ -1,0 +1,11 @@
+{
+    "name": "THR",
+    "short_name": "T",
+    "num_heavy_atoms": 3,
+    "heavy_atom_names": [
+        "CB",
+        "OG1",
+        "CG2"
+    ],
+    "hydrogens": []
+}

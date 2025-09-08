@@ -1,0 +1,15 @@
+{
+    "name": "ARG",
+    "short_name": "R",
+    "num_heavy_atoms": 7,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD",
+        "NE",
+        "CZ",
+        "NH1",
+        "NH2"
+    ],
+    "hydrogens": []
+}

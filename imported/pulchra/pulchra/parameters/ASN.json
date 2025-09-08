@@ -1,0 +1,12 @@
+{
+    "name": "ASN",
+    "short_name": "N",
+    "num_heavy_atoms": 4,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "OD1",
+        "ND2"
+    ],
+    "hydrogens": []
+}

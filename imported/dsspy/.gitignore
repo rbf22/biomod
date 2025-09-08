@@ -1,0 +1,17 @@
+.vscode/
+.vs/
+build/
+.gdb_history
+**/*.dssp
+src/revision.hpp
+libdssp/src/revision.hpp
+python-module/mkdssp.so
+
+# Python cache files
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+dsspy.egg-info/

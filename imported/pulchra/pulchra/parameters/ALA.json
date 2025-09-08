@@ -1,0 +1,9 @@
+{
+    "name": "ALA",
+    "short_name": "A",
+    "num_heavy_atoms": 1,
+    "heavy_atom_names": [
+        "CB"
+    ],
+    "hydrogens": []
+}

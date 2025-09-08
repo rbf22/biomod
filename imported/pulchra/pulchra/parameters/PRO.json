@@ -1,0 +1,11 @@
+{
+    "name": "PRO",
+    "short_name": "P",
+    "num_heavy_atoms": 3,
+    "heavy_atom_names": [
+        "CB",
+        "CG",
+        "CD"
+    ],
+    "hydrogens": []
+}

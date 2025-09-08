@@ -1,0 +1,61 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "google-labs-jules[bot]", email = "161369871+google-labs-jules[bot]@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.3.2,<3.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.2"
+pytest-cov = "^5.0.0"
+ruff = "^0.5.5"
+pylint = "^3.2.6"
+mypy = "^1.11.0"
+deptry = "^0.17.0"
+
+# -------------------------------
+# Ruff configuration
+# -------------------------------
+[tool.ruff]
+# Enable all error codes, but we'll focus on docstrings
+select = [
+    "D",    # pydocstyle rules (docstrings)
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+]
+# Ignore rules you don’t care about (example: missing module/package docstrings)
+ignore = [
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D107", # Missing docstring in __init__
+]
+
+# Allow slightly longer docstring lines
+line-length = 100
+
+[tool.ruff.pydocstyle]
+# Choose your convention: "google", "numpy", or "pep257"
+convention = "google"
+
+# -------------------------------
+# Mypy configuration (optional)
+# -------------------------------
+[tool.mypy]
+python_version = "3.12"
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
