@@ -1,11 +1,11 @@
 import torch
 import unittest
 import os
-import vitra.data_structures as data_structures
-import vitra.utils as utils
-from vitra.energies.hbond_net import HBondNet
-from vitra.sources import hashings
-from vitra.ForceField import ForceField
+from biomod.energy import vitra_tensors as data_structures
+from biomod.io import vitra_utils as utils
+from biomod.energy.hbond_net import HBondNet
+from biomod.energy import hashings
+from biomod.energy.force_field import ForceField
 
 class TestHbondNetShapes(unittest.TestCase):
     def test_forward_output_shapes(self):
@@ -16,7 +16,7 @@ class TestHbondNetShapes(unittest.TestCase):
         device = 'cpu'
 
         # 1. Load data and create info tensors
-        pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures", "alanine.pdb")
+        pdb_file = "tests/reference_data/alanine.pdb"
         coordinates, atom_names, _ = utils.parse_pdb(pdb_file)
         coordinates = coordinates.to(device)
 

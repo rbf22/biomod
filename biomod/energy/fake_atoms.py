@@ -15,8 +15,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import torch
-from vitra.sources.globalVariables import PADDING_INDEX, EPS
-from vitra.sources import hashings, math_utils
+from ..config import PADDING_INDEX, EPS
+from . import hashings, math_utils
 
 
 def generateFakeAtomTensor(coords, partnersCoords, atomDescription, fake_atom_properties):
@@ -68,7 +68,7 @@ def add_hydrogen(r1, r2, r3, hpos):
     full_mask = padding_mask.unsqueeze(1).expand(-1, hpos.shape[1]).clone()
     full_mask[padding_mask] = fakeAtomsPadding
 
-    final_coords = torch.full((r1.shape[0], hpos.shape[1], 3), PADDING_INDEX, device=r1.device)
+    final_coords = torch.full((r1.shape[0], hpos.shape[1], 3), PADDING_INDEX, device=r1.device, dtype=torch.float)
     final_coords[full_mask] = hcoords_fin
 
     return final_coords

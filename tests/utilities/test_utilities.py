@@ -1,12 +1,13 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch, MagicMock
-from atomium.structures import Atom
-from atomium.utilities import (
- open, fetch, fetch_over_ssh, parse_string, get_parse_functions, save,
- mmcif_string_to_mmcif_dict, mmcif_dict_to_data_dict, mmtf_bytes_to_mmtf_dict,
- mmtf_dict_to_data_dict, pdb_string_to_pdb_dict, pdb_dict_to_data_dict,
- find_downstream_atoms
+from biomod.core.atoms import Atom
+from biomod.io.utils import (
+ open, fetch, fetch_over_ssh, parse_string, get_parse_functions, save
 )
+from biomod.io.mmcif import mmcif_string_to_mmcif_dict, mmcif_dict_to_data_dict
+from biomod.io.mmtf import mmtf_bytes_to_mmtf_dict, mmtf_dict_to_data_dict
+from biomod.io.pdb import pdb_string_to_pdb_dict, pdb_dict_to_data_dict
+from biomod.utilities.utils import find_downstream_atoms
 
 class DownstreamAtomFindingTests(TestCase):
 
@@ -29,7 +30,7 @@ class OpeningTests(TestCase):
 
     def setUp(self):
         self.patch1 = patch("builtins.open")
-        self.patch2 = patch("atomium.utilities.parse_string")
+        self.patch2 = patch("biomod.io.utils.parse_string")
         self.mock_open = self.patch1.start()
         self.mock_parse = self.patch2.start()
         open_return = MagicMock()
@@ -61,10 +62,10 @@ class OpeningTests(TestCase):
 class FetchingTests(TestCase):
 
     def setUp(self):
-        self.patch1 = patch("atomium.utilities.get")
+        self.patch1 = patch("biomod.io.utils.get")
         self.mock_get = self.patch1.start()
         self.mock_get.return_value = Mock(status_code=200, text="ABC")
-        self.patch2 = patch("atomium.utilities.parse_string")
+        self.patch2 = patch("biomod.io.utils.parse_string")
         self.mock_parse = self.patch2.start()
 
 
@@ -120,7 +121,7 @@ class FetchingOverSshTests(TestCase):
         self.patch2 = patch("paramiko.AutoAddPolicy")
         self.mock_policy = self.patch2.start()
         self.mock_policy.return_value = "POLICY"
-        self.patch3 = patch("atomium.utilities.parse_string")
+        self.patch3 = patch("biomod.io.utils.parse_string")
         self.mock_parse = self.patch3.start()
 
 
@@ -166,7 +167,7 @@ class FetchingOverSshTests(TestCase):
 
 class StringParsingTests(TestCase):
 
-    @patch("atomium.utilities.get_parse_functions")
+    @patch("biomod.io.utils.get_parse_functions")
     def test_can_get_file_dict(self, mock_get):
         mock_get.return_value = [MagicMock(), MagicMock()]
         f = parse_string("ABCD", "file.xyz", file_dict=True)
@@ -175,7 +176,7 @@ class StringParsingTests(TestCase):
         self.assertEqual(f, mock_get.return_value[0].return_value)
 
 
-    @patch("atomium.utilities.get_parse_functions")
+    @patch("biomod.io.utils.get_parse_functions")
     def test_can_get_data_dict(self, mock_get):
         mock_get.return_value = [MagicMock(), MagicMock()]
         f = parse_string("ABCD", "file.xyz", data_dict=True)
@@ -185,8 +186,8 @@ class StringParsingTests(TestCase):
         self.assertEqual(f, mock_get.return_value[1].return_value)
 
 
-    @patch("atomium.utilities.get_parse_functions")
-    @patch("atomium.utilities.data_dict_to_file")
+    @patch("biomod.io.utils.get_parse_functions")
+    @patch("biomod.io.builder.data_dict_to_file")
     def test_can_get_file(self, mock_data, mock_get):
         mock_get.return_value = [MagicMock(), MagicMock()]
         mock_get.return_value[1].__name__ = "mmcif_Z"

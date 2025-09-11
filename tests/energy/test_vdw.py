@@ -1,6 +1,6 @@
 import torch
-from vitra.energies.vdw import Vdw
-from vitra.sources import hashings
+from biomod.energy.vdw import Vdw
+from biomod.energy import hashings
 
 def test_vdw_energy():
     """

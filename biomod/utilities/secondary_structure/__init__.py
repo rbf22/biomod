@@ -1,1 +1,1 @@
-# This directory holds code related to secondary structure assignment (e.g., DSSP).
+from .calculations import calculate_beta_sheets, calculate_pp_helices

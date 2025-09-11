@@ -1,4 +1,4 @@
-from vitra.energies.electro_net import ElectrostaticsEnergy
+from biomod.energy.electro_net import ElectrostaticsEnergy
 
 def test_electrostatic_energy():
     """

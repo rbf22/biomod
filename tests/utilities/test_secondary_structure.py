@@ -2,8 +2,8 @@
 Tests for the secondary_structure module.
 """
 from unittest.mock import Mock
-from dsspy.core import StructureType, HelixType, HelixPositionType
-from dsspy.secondary_structure import calculate_pp_helices
+from biomod.utilities.secondary_structure.data_structures import StructureType, HelixType, HelixPositionType
+from biomod.utilities.secondary_structure import calculate_pp_helices
 
 def create_mock_residue(phi=None, psi=None):
     """Creates a mock residue for testing."""

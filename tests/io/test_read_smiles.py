@@ -15,7 +15,7 @@
 
 import pytest
 import networkx as nx
-from pysmiles.read_smiles import read_smiles
+from biomod.io.smiles import read_smiles
 from tests.testhelper import assertEqualGraphs, make_mol
 
 

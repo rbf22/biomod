@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import torch
 
 from . import hashings
-from ..config import PADDING_INDEX
+from biomod.config import PADDING_INDEX
 from .kde import realNVP
 
 @dataclass

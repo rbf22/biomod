@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from vitra.energies.hbond_net import HBondNet
+from biomod.energy.hbond_net import HBondNet
 
 def test_hbond_angle_penalty():
     """

@@ -23,7 +23,7 @@
 #  
 import torch
 import numpy as np
-from vitra.sources.globalVariables import EPS
+from ..config import EPS
 
 
 def dot2dVectors(v1, v2):

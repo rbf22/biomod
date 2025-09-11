@@ -3,7 +3,7 @@ Tests for the core data structures.
 """
 
 from unittest.mock import Mock
-from dsspy.core import HBond, Residue, BridgePartner, Bridge, BridgeType
+from biomod.utilities.secondary_structure.data_structures import HBond, Residue, BridgePartner, Bridge, BridgeType
 
 def test_hbond_repr():
     """Tests the __repr__ of the HBond class."""

@@ -1,24 +1,24 @@
-import atomium
+from biomod.io import io
 import os
 from unittest import TestCase
 
 class SavingTest(TestCase):
 
     def setUp(self):
-        self.files_at_start = os.listdir("tests/integration/files")
+        self.files_at_start = os.listdir("tests/io/integration/files")
 
 
     def tearDown(self):
-        files_at_end = os.listdir("tests/integration/files")
+        files_at_end = os.listdir("tests/io/integration/files")
         to_remove = [f for f in files_at_end if f not in self.files_at_start]
         for f in to_remove:
-            os.remove("tests/integration/files/" + f)
+            os.remove("tests/io/integration/files/" + f)
 
 
     def check_file_saving(self, filename):
-        f = atomium.open("tests/integration/files/" + filename)
-        f.model.save("tests/integration/files/saved_" + filename)
-        f2 = atomium.open("tests/integration/files/saved_" + filename)
+        f = io.open("tests/io/integration/files/" + filename)
+        f.model.save("tests/io/integration/files/saved_" + filename)
+        f2 = io.open("tests/io/integration/files/saved_" + filename)
         self.assertEqual(f.model, f2.model)
         self.assertEqual(len(f.model.chains()), len(f2.model.chains()))
         for chain1, chain2 in zip(sorted(f.model.chains(), key=lambda c: c.id),
@@ -66,17 +66,17 @@ class MmcifFileSavingTests(SavingTest):
 
 
     def test_chain(self):
-        f = atomium.open("tests/integration/files/1lol.cif")
-        f.model.chain("A").save("tests/integration/files/chaina.cif")
-        chain = atomium.open("tests/integration/files/chaina.cif").model
+        f = io.open("tests/io/integration/files/1lol.cif")
+        f.model.chain("A").save("tests/io/integration/files/chaina.cif")
+        chain = io.open("tests/io/integration/files/chaina.cif").model
         self.assertEqual(f.model.chain("A"), chain)
 
 
     def test_biological_assembly_warns_on_saving(self):
-        f = atomium.open("tests/integration/files/1xda.cif")
+        f = io.open("tests/io/integration/files/1xda.cif")
         model = f.generate_assembly(5)
         with self.assertWarns(Warning):
-            model.save("tests/integration/files/assembly.cif")
+            model.save("tests/io/integration/files/assembly.cif")
 
 
 
@@ -107,17 +107,17 @@ class MmtfFileSavingTests(SavingTest):
 
 
     def test_chain(self):
-        f = atomium.open("tests/integration/files/1lol.mmtf")
-        f.model.chain("A").save("tests/integration/files/chaina.mmtf")
-        chain = atomium.open("tests/integration/files/chaina.mmtf").model
+        f = io.open("tests/io/integration/files/1lol.mmtf")
+        f.model.chain("A").save("tests/io/integration/files/chaina.mmtf")
+        chain = io.open("tests/io/integration/files/chaina.mmtf").model
         self.assertEqual(f.model.chain("A"), chain)
 
 
     def test_biological_assembly_warns_on_saving(self):
-        f = atomium.open("tests/integration/files/1xda.cif")
+        f = io.open("tests/io/integration/files/1xda.cif")
         model = f.generate_assembly(5)
         with self.assertWarns(Warning):
-            model.save("tests/integration/files/assembly.cif")
+            model.save("tests/io/integration/files/assembly.cif")
 
 
 
@@ -153,26 +153,26 @@ class PdbFileSavingTests(SavingTest):
 
     def test_can_save_1grm(self):
         self.check_file_saving("1grm.pdb")
-        f = atomium.open("tests/integration/files/1grm.pdb")
-        f.model.save("tests/integration/files/saved_1grm.pdb")
-        with open("tests/integration/files/1grm.pdb") as f:
+        f = io.open("tests/io/integration/files/1grm.pdb")
+        f.model.save("tests/io/integration/files/saved_1grm.pdb")
+        with open("tests/io/integration/files/1grm.pdb") as f:
             old_text = f.read()
             old_text = old_text[:old_text.find("ENDMDL")]
             old_remark_count = old_text.count("HETATM")
-        with open("tests/integration/files/saved_1grm.pdb") as f:
+        with open("tests/io/integration/files/saved_1grm.pdb") as f:
             new_remark_count = f.read().count("HETATM")
         self.assertEqual(old_remark_count, new_remark_count)
 
 
     def test_chain(self):
-        f = atomium.open("tests/integration/files/1lol.pdb")
-        f.model.chain("A").save("tests/integration/files/chaina.pdb")
-        chain = atomium.open("tests/integration/files/chaina.pdb").model
+        f = io.open("tests/io/integration/files/1lol.pdb")
+        f.model.chain("A").save("tests/io/integration/files/chaina.pdb")
+        chain = io.open("tests/io/integration/files/chaina.pdb").model
         self.assertEqual(f.model.chain("A"), chain)
 
 
     def test_biological_assembly_warns_on_saving(self):
-        f = atomium.open("tests/integration/files/1xda.pdb")
+        f = io.open("tests/io/integration/files/1xda.pdb")
         model = f.generate_assembly(5)
         with self.assertWarns(Warning):
-            model.save("tests/integration/files/assembly.pdb")
+            model.save("tests/io/integration/files/assembly.pdb")

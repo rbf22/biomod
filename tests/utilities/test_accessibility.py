@@ -4,8 +4,8 @@ Tests for accessibility calculation.
 
 import re
 import pytest
-from dsspy.io import read_cif
-from dsspy.accessibility import calculate_accessibility
+from biomod.io.io import read_cif
+from biomod.utilities.accessibility import calculate_accessibility
 
 
 def parse_reference_accessibility(filepath):

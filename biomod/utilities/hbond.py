@@ -3,8 +3,9 @@ This module contains functions for calculating hydrogen bond energies between re
 """
 import numpy as np
 
-from .core import Residue, HBond
-from .constants import MINIMAL_DISTANCE, MIN_HBOND_ENERGY, COUPLING_CONSTANT
+from ..core.residues import Residue
+from ..utilities.secondary_structure.data_structures import HBond
+from ..config import MINIMAL_DISTANCE, MIN_HBOND_ENERGY, COUPLING_CONSTANT
 
 
 def calculate_h_bond_energy(donor: Residue, acceptor: Residue):

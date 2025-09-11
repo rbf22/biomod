@@ -1,6 +1,6 @@
 import torch
 import math
-from vitra.energies.bond_len_constrain import BondLengthConstraintEnergy
+from biomod.energy.bond_len_constrain import BondLengthConstraintEnergy
 
 def test_bondlen_constrain_score_distro():
     """

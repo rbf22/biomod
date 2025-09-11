@@ -2,7 +2,7 @@
 Tests for the utils module.
 """
 
-from dsspy.utils import get_sheet_label
+from biomod.utilities.utils import get_sheet_label
 
 def test_get_sheet_label():
     """

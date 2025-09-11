@@ -1,5 +1,7 @@
 from unittest import TestCase
-from atomium.structures import Atom, Residue, Chain
+from biomod.core.atoms import Atom
+from biomod.core.residues import Residue
+from biomod.core.base import Chain
 import numpy as np
 
 class DihedralModificationTests(TestCase):

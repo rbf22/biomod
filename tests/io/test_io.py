@@ -3,8 +3,8 @@ Tests for the io module.
 """
 import gzip
 from io import StringIO
-from dsspy.io import read_pdb, read_cif
-from dsspy.core import Residue, ChainBreakType
+from biomod.io.io import read_pdb, read_cif
+from biomod.utilities.secondary_structure.data_structures import Residue, ChainBreakType
 
 def test_read_pdb():
     """

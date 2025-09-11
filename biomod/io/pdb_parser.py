@@ -1,4 +1,21 @@
-from .pdb_datastructures import Atom, Residue, Molecule
+from ..core.atoms import Atom
+from ..core.residues import Residue
+from ..core.base import Molecule
+
+class PDBParser:
+    def __init__(self, path):
+        self.molecule = read_pdb_file(path, path)
+
+    def get_structure(self):
+        return self.molecule
+
+    def get_residues(self, chain_id='A'):
+        return [r for r in self.molecule.residues if r.chain == chain_id]
+
+    def get_residue(self, res_id, chain_id='A'):
+        for r in self.molecule.residues:
+            if r.chain == chain_id and r.num == res_id:
+                return r
 
 def read_pdb_file(filename, realname):
     """

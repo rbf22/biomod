@@ -1,8 +1,8 @@
 import torch
 import numpy as np
 
-from vitra.sources import geometry
-from vitra.sources.globalVariables import PADDING_INDEX, NON_ACCEPTABLE_DISTANCE, MISSING_ATOM
+from . import geometry
+from ..config import PADDING_INDEX, NON_ACCEPTABLE_DISTANCE, MISSING_ATOM
 
 
 def select_closest_hydrogen(x1_coords, hydrogen_p):

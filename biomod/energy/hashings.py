@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from vitra.sources import hashingsGeneration
+from . import hashingsGeneration
 from typing import Dict, List, Tuple
 
 resi_hash = {'CYS': 0, 'ASP': 1, 'SER': 2, 'GLN': 3, 'LYS': 4, 'ASN': 5, 'PRO': 6, 'THR': 7, 'PHE': 8, 'ALA': 9,

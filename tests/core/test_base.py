@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch, MagicMock
-from atomium.base import (
+from biomod.core.base import (
  get_object_from_filter, get_object_attribute_from_filter,
  attribute_matches_value, filter_objects, query, getone, StructureClass,
  StructureSet
@@ -70,10 +70,10 @@ class AttributeMatchingTests(TestCase):
 
 class ObjectFilteringTests(TestCase):
 
-    @patch("atomium.base.get_object_from_filter")
-    @patch("atomium.base.get_object_attribute_from_filter")
-    @patch("atomium.base.attribute_matches_value")
-    @patch("atomium.base.StructureSet")
+    @patch("biomod.core.base.get_object_from_filter")
+    @patch("biomod.core.base.get_object_attribute_from_filter")
+    @patch("biomod.core.base.attribute_matches_value")
+    @patch("biomod.core.base.StructureSet")
     def test_can_filter_objects(self, mock_s, mock_match, mock_getat, mock_getob):
         structures=[
          Mock(x="A", y=1), Mock(x="B", y=3), Mock(x="B", y=3),
@@ -104,7 +104,7 @@ class QueryDecoratorTests(TestCase):
         self.assertEqual(f(self), {2, 4, 6})
 
 
-    @patch("atomium.base.filter_objects")
+    @patch("biomod.core.base.filter_objects")
     def test_can_get_filtered_objects(self, mock_filter):
         mock_filter.side_effect = [Mock(structures={20}, ids={10})]
         f = query(self.f)
@@ -112,7 +112,7 @@ class QueryDecoratorTests(TestCase):
         mock_filter.assert_any_call(self.s, "a", 1)
 
 
-    @patch("atomium.base.filter_objects")
+    @patch("biomod.core.base.filter_objects")
     def test_can_get_filtered_objects_as_tuple(self, mock_filter):
         mock_filter.side_effect = [Mock(structures={2}, ids={1})]
         f = query(self.f, tuple_=True)
@@ -147,8 +147,8 @@ class GetOneDecoratorTests(TestCase):
 
 class StructureClassMetaclassTests(TestCase):
 
-    @patch("atomium.base.query")
-    @patch("atomium.base.getone")
+    @patch("biomod.core.base.query")
+    @patch("biomod.core.base.getone")
     def test_structure_class_metaclass(self, mock_getone, mock_query):
         class TestClass(metaclass=StructureClass):
             def a(self): return 1000

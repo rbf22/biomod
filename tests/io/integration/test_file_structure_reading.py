@@ -1,17 +1,20 @@
 from datetime import date
 import math
-import atomium
+from biomod.core.atoms import Atom
+from biomod.core.residues import Residue, Ligand
+from biomod.core.base import Chain, Model
+from biomod.io import io
 from unittest import TestCase
 
 class DeNovoStructureTests(TestCase):
 
     def test_structure_processing(self):
         # Create five atoms of a residue
-        atom1 = atomium.Atom("N", 0, 0, 0, 1, "N", 0.5, 0.5, [0] * 6)
-        atom2 = atomium.Atom("C", 1.5, 0, 0, 2, "CA", 0, 0.4, [0] * 6)
-        atom3 = atomium.Atom("C", 1.5, 1.5, 0, 3, "CB", 0, 0.3, [1] * 6)
-        atom4 = atomium.Atom("C", 3, 0, 0, 4, "C", 0, 0.2, [0] * 6)
-        atom5 = atomium.Atom("O", 3, -1.5, 0, 5, "O", 0, 0.1, [0] * 6)
+        atom1 = Atom("N", 0, 0, 0, 1, "N", 0.5, 0.5, [0] * 6)
+        atom2 = Atom("C", 1.5, 0, 0, 2, "CA", 0, 0.4, [0] * 6)
+        atom3 = Atom("C", 1.5, 1.5, 0, 3, "CB", 0, 0.3, [1] * 6)
+        atom4 = Atom("C", 3, 0, 0, 4, "C", 0, 0.2, [0] * 6)
+        atom5 = Atom("O", 3, -1.5, 0, 5, "O", 0, 0.1, [0] * 6)
 
         # Check basic atom properties
         self.assertEqual(atom2.element, "C")
@@ -116,7 +119,7 @@ class DeNovoStructureTests(TestCase):
         self.assertEqual(copy.id, 10000)
 
         # Create residue
-        res1 = atomium.Residue(
+        res1 = Residue(
          atom1, atom2, atom3, atom4, atom5, id="A5", name="AL"
         )
 
@@ -209,19 +212,19 @@ class DeNovoStructureTests(TestCase):
         self.assertEqual({a.id for a in res_copy.atoms()}, {100, 200, 300, 400, 500})
 
         # Make more residues
-        atom6 = atomium.Atom("N", 4.5, 0, 0, 6, "N", 0, 0.5, [0] * 6)
-        atom7 = atomium.Atom("C", 6, 0, 0, 7, "CA", 0, 0.5, [0] * 6)
-        atom8 = atomium.Atom("C", 6, -1.5, 0, 8, "CB", 0, 0.5, [0] * 6)
-        atom9 = atomium.Atom("S", 6, -3, 0, 9, "S", 0, 0.5, [0] * 6)
-        atom10 = atomium.Atom("C", 7.5, 0, 0, 10, "C", 0, 0.5, [0] * 6)
-        atom11 = atomium.Atom("O", 7.5, 1.5, 0, 11, "O", 0, 0.5, [0] * 6)
-        atom12 = atomium.Atom("N", 9, 0, 0, 12, "CA", 0, 0.5, [0] * 6)
-        atom13 = atomium.Atom("C", 10.5, 0, 0, 13, "CB", 0, 0.5, [0] * 6)
-        atom14 = atomium.Atom("C", 10.5, 1.5, 0, 14, "OG", 0, 0.5, [0] * 6)
-        atom15 = atomium.Atom("O", 10.5, 3, 0, 15, "C", 0, 0.5, [0] * 6)
-        atom16 = atomium.Atom("C", 12, 0, 0, 16, "C", 0, 0.5, [0] * 6)
-        atom17 = atomium.Atom("O", 13.5, 1.25, 0, 17, "OX1", 0, 0.5, [0] * 6)
-        atom18 = atomium.Atom("O", 13.5, -1.25, 0, 18, "OX2", 0, 0.5, [0] * 6)
+        atom6 = Atom("N", 4.5, 0, 0, 6, "N", 0, 0.5, [0] * 6)
+        atom7 = Atom("C", 6, 0, 0, 7, "CA", 0, 0.5, [0] * 6)
+        atom8 = Atom("C", 6, -1.5, 0, 8, "CB", 0, 0.5, [0] * 6)
+        atom9 = Atom("S", 6, -3, 0, 9, "S", 0, 0.5, [0] * 6)
+        atom10 = Atom("C", 7.5, 0, 0, 10, "C", 0, 0.5, [0] * 6)
+        atom11 = Atom("O", 7.5, 1.5, 0, 11, "O", 0, 0.5, [0] * 6)
+        atom12 = Atom("N", 9, 0, 0, 12, "CA", 0, 0.5, [0] * 6)
+        atom13 = Atom("C", 10.5, 0, 0, 13, "CB", 0, 0.5, [0] * 6)
+        atom14 = Atom("C", 10.5, 1.5, 0, 14, "OG", 0, 0.5, [0] * 6)
+        atom15 = Atom("O", 10.5, 3, 0, 15, "C", 0, 0.5, [0] * 6)
+        atom16 = Atom("C", 12, 0, 0, 16, "C", 0, 0.5, [0] * 6)
+        atom17 = Atom("O", 13.5, 1.25, 0, 17, "OX1", 0, 0.5, [0] * 6)
+        atom18 = Atom("O", 13.5, -1.25, 0, 18, "OX2", 0, 0.5, [0] * 6)
         atom6.bond(atom7)
         atom6.bond(atom4)
         atom7.bond(atom8)
@@ -235,10 +238,10 @@ class DeNovoStructureTests(TestCase):
         atom14.bond(atom15)
         atom16.bond(atom17)
         atom16.bond(atom18)
-        res2 = atomium.Residue(
+        res2 = Residue(
          atom6, atom7, atom8, atom9, atom10, atom11, id="A5A", name="CYS"
         )
-        res3 = atomium.Residue(
+        res3 = Residue(
          atom12, atom13, atom14, atom15, atom16, atom17, atom18, id="A6", name="SER"
         )
 
@@ -251,7 +254,7 @@ class DeNovoStructureTests(TestCase):
         self.assertIs(res2.previous, res1)
 
         # Create chain
-        chain1 = atomium.Chain(
+        chain1 = Chain(
          res1, res2, res3, id="A", sequence="MACSD", helices=((res1, res2),), strands=((res3,),)
         )
         self.assertEqual(chain1.id, "A")
@@ -333,8 +336,8 @@ class DeNovoStructureTests(TestCase):
         self.assertEqual(chain1.rmsd_with(chain2), 0)
 
         # Make ligand
-        copper_atom = atomium.Atom("Cu", 6, -5.25, 2, 100, "Cu", 2, 0, [0] * 6)
-        copper = atomium.Ligand(
+        copper_atom = Atom("Cu", 6, -5.25, 2, 100, "Cu", 2, 0, [0] * 6)
+        copper = Ligand(
          copper_atom, id="A100", internal_id="M", name="CU", chain=chain1, full_name="copper"
         )
 
@@ -365,19 +368,19 @@ class DeNovoStructureTests(TestCase):
         self.assertEqual(cu_copy.atom().id, 10000)
 
         # Create waters
-        hoh1 = atomium.Ligand(
-         atomium.Atom("O", 3, -3, 3, 500, "O", 0, 0, [0] * 6),
+        hoh1 = Ligand(
+         Atom("O", 3, -3, 3, 500, "O", 0, 0, [0] * 6),
          id="A1000", name="HOH", water=True
         )
         self.assertTrue(hoh1.is_water)
-        hoh2 = atomium.Ligand(
-         atomium.Atom("O", 3, -9, -3, 500, "O", 0, 0, [0] * 6),
+        hoh2 = Ligand(
+         Atom("O", 3, -9, -3, 500, "O", 0, 0, [0] * 6),
          id="B1000", name="HOH", water=True
         )
         self.assertTrue(hoh2.is_water)
 
         # Create model
-        model = atomium.Model(chain1, chain2, copper, hoh1, hoh2)
+        model = Model(chain1, chain2, copper, hoh1, hoh2)
         
         # Model properties
         self.assertIsNone(model.file)
@@ -427,7 +430,7 @@ class FileReadingTests(TestCase):
 
     def test_1lol(self):
         for e in ["cif", "mmtf", "pdb", "pdb.gz", "cif.gz"]:
-            f = atomium.open("tests/integration/files/1lol." + e)
+            f = io.open("tests/io/integration/files/1lol." + e)
             self.assertEqual(f.filetype, e.replace(".gz", ""))
             self.assertEqual(f.code, "1LOL")
             if e.startswith("pdb"):
@@ -645,7 +648,7 @@ class FileReadingTests(TestCase):
 
     def test_5xme(self):
         for e in ["cif", "mmtf", "pdb"]:
-            f = atomium.open("tests/integration/files/5xme." + e)
+            f = io.open("tests/io/integration/files/5xme." + e)
             self.assertEqual(f.resolution, None)
             models = f.models
             self.assertEqual(len(models), 10)
@@ -680,7 +683,7 @@ class FileReadingTests(TestCase):
 
     def test_1cbn(self):
         for e in ["cif", "mmtf", "pdb"]:
-            f = atomium.open("tests/integration/files/1cbn." + e)
+            f = io.open("tests/io/integration/files/1cbn." + e)
             chain = f.model.chain()
             residue1, residue2, residue3 = chain[:3]
             self.assertEqual(len(residue1.atoms()), 16)
@@ -693,7 +696,7 @@ class FileReadingTests(TestCase):
 
     def test_1xda(self):
         for e in ["cif", "mmtf", "pdb"]:
-            f = atomium.open("tests/integration/files/1xda." + e)
+            f = io.open("tests/io/integration/files/1xda." + e)
             self.assertEqual(len(f.model.atoms()), 1842)
             self.assertEqual(len(f.model.atoms(is_metal=True)), 4)
             self.assertEqual(len(f.model.atoms(is_metal=False)), 1838)
@@ -739,7 +742,7 @@ class FileReadingTests(TestCase):
 
     def test_4opj(self):
         for e in ["cif", "mmtf", "pdb"]:
-            f = atomium.open("tests/integration/files/4opj." + e)
+            f = io.open("tests/io/integration/files/4opj." + e)
             if e == "cif":
                 self.assertEqual(
                  f.model.residue("B.6").full_name,
@@ -777,7 +780,7 @@ class FileReadingTests(TestCase):
     def test_6xlu(self):
         # Branched chains
         for e in ["cif", "mmtf", "pdb"]:
-            f = atomium.open("tests/integration/files/6xlu." + e)
+            f = io.open("tests/io/integration/files/6xlu." + e)
             self.assertEqual(len(f.model.chains()), 3 if e == "pdb" else 18)
             self.assertEqual(len(f.model.ligands()), 62 if e == "pdb" else 32)
     
@@ -785,5 +788,5 @@ class FileReadingTests(TestCase):
     def test_3jbp(self):
         # Multi character secondary structure
         for e in ["cif"]:
-            f = atomium.open("tests/integration/files/3jbp." + e)
+            f = io.open("tests/io/integration/files/3jbp." + e)
             self.assertEqual(len(f.model.chain("Aa").helices), 4)

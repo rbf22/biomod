@@ -1,4 +1,4 @@
-from vitra.energies.disulfide_net import DisulfideEnergy
+from biomod.energy.disulfide_net import DisulfideEnergy
 
 def test_disulfide_instantiation():
     """

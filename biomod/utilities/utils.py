@@ -4,7 +4,7 @@ import numpy as np
 from biomod.config import PDB_ATOM_LINE, PDB_TER_LINE, PDB_END_LINE
 from biomod.core.residues import Residue
 from biomod.core.atoms import Atom
-from biomod.core.base import Chain, Model, Structure
+from biomod.core.base import Chain, Model
 from biomod.io.pdb_parser import PDBParser
 
 
@@ -69,9 +69,7 @@ def get_model_from_chain_list(chains, model_id=0):
 def get_structure_from_model(model):
     """
     """
-    structure = Structure('str')
-    structure.models.append(model)
-    return structure
+    return model
 
 
 def get_structure_from_pdb(path):
@@ -193,35 +191,45 @@ def superimpose(mobile_coords, reference_coords):
 
     return rotated_coords, rmsd
 
-def get_atoms_from_structure(structure):
+def get_atoms_from_structure(model):
     """
-    Extracts all atoms from a Structure object.
+    Extracts all atoms from a Model object.
 
     Args:
-        structure (Structure): The structure to extract atoms from.
+        model (Model): The model to extract atoms from.
 
     Returns:
         list: A list of all Atom objects in the structure.
     """
     atoms = []
-    for model in structure.models:
-        for chain in model.chains:
-            for residue in chain.residues:
-                atoms.extend(residue.atoms)
+    for chain in model.chains():
+        for residue in chain.residues():
+            atoms.extend(residue.atoms())
     return atoms
 
-def get_residues_from_structure(structure):
+def get_residues_from_structure(model):
     """
-    Extracts all residues from a Structure object.
+    Extracts all residues from a Model object.
 
     Args:
-        structure (Structure): The structure to extract residues from.
+        model (Model): The model to extract residues from.
 
     Returns:
         list: A list of all Residue objects in the structure.
     """
     residues = []
-    for model in structure.models:
-        for chain in model.chains:
-            residues.extend(chain.residues)
+    for chain in model.chains():
+        residues.extend(chain.residues())
     return residues
+
+def get_sheet_label(sheet_number):
+    """
+    Converts a sheet number to a character label.
+    """
+    if sheet_number == 0:
+        return ' '
+    if 1 <= sheet_number <= 26:
+        return chr(ord('A') + sheet_number - 1)
+    if 27 <= sheet_number <= 52:
+        return chr(ord('a') + sheet_number - 27)
+    return '?'

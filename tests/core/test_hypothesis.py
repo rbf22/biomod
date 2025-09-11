@@ -19,11 +19,8 @@ from hypothesis import note, settings, assume
 
 import networkx as nx
 
-from pysmiles.read_smiles import read_smiles
-from pysmiles.write_smiles import write_smiles
-from pysmiles.smiles_helper import (
-    add_explicit_hydrogens, remove_explicit_hydrogens, fill_valence,
-    correct_aromatic_rings, increment_bond_orders, kekulize, dekekulize)
+from biomod.io.smiles import read_smiles, add_explicit_hydrogens, remove_explicit_hydrogens, fill_valence, correct_aromatic_rings, increment_bond_orders, kekulize, dekekulize
+from biomod.io.write_smiles import write_smiles
 from tests.testhelper import assertEqualGraphs
 
 isotope = st.integers(min_value=1)

@@ -3,12 +3,12 @@ Tests for the output module.
 """
 
 from unittest.mock import Mock
-from dsspy.output import _format_header, format_dssp_line
-from dsspy.io import read_cif
-from dsspy.hbond import calculate_h_bonds
-from dsspy.secondary_structure import calculate_beta_sheets
-from dsspy.utils import get_sheet_label
-from dsspy.core import HelixType, HelixPositionType, StructureType, Residue
+from biomod.io.output import _format_header, format_dssp_line
+from biomod.io.io import read_cif
+from biomod.utilities.hbond import calculate_h_bonds
+from biomod.utilities.secondary_structure import calculate_beta_sheets
+from biomod.utilities.utils import get_sheet_label
+from biomod.utilities.secondary_structure.data_structures import HelixType, HelixPositionType, StructureType, Residue
 
 def test_format_header():
     """

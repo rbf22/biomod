@@ -15,8 +15,8 @@
 
 import pytest
 
-from pysmiles.read_smiles import read_smiles
-from pysmiles.write_smiles import write_smiles
+from biomod.io.smiles import read_smiles
+from biomod.io.write_smiles import write_smiles
 from tests.testhelper import assertEqualGraphs, make_mol
 
 

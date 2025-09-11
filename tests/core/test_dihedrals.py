@@ -1,6 +1,8 @@
 from unittest import TestCase
 from unittest.mock import patch, PropertyMock
-from atomium.structures import Atom, Residue, Chain
+from biomod.core.atoms import Atom
+from biomod.core.residues import Residue
+from biomod.core.base import Chain
 
 class DihedralAngleTests(TestCase):
 

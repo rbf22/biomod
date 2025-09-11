@@ -1,5 +1,5 @@
 import numpy as np
-from pulchra.hydrogens import get_hydrogen_positions
+from biomod.utilities.hydrogens import get_hydrogen_positions
 
 def test_get_hydrogen_positions_serine():
     """

@@ -2,8 +2,8 @@
 Tests for the beta sheet calculation in the secondary_structure module.
 """
 from unittest.mock import Mock
-from dsspy.core import BridgeType, Residue, StructureType, BridgePartner
-from dsspy.secondary_structure import calculate_beta_sheets
+from biomod.utilities.secondary_structure.data_structures import BridgeType, Residue, StructureType, BridgePartner
+from biomod.utilities.secondary_structure import calculate_beta_sheets
 
 def create_mock_bio_residue(res_num, chain_id='A', parent_mock=None):
     """Creates a mock biopython residue object."""

@@ -6,9 +6,9 @@ import gzip
 from unittest.mock import Mock
 import pytest
 import numpy as np
-from dsspy.io import read_cif
-from dsspy.hbond import calculate_h_bonds, calculate_h_bond_energy, assign_hydrogen_to_residues
-from dsspy.constants import MIN_HBOND_ENERGY
+from biomod.io.io import read_cif
+from biomod.utilities.hbond import calculate_h_bonds, calculate_h_bond_energy, assign_hydrogen_to_residues
+from biomod.config import MIN_HBOND_ENERGY
 
 
 def parse_reference_dssp(filepath):

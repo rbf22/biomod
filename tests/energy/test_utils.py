@@ -1,7 +1,7 @@
 import os
 import torch
 import pytest
-from vitra import utils
+from biomod.io import vitra_utils as utils
 import tempfile
 import shutil
 
@@ -26,27 +26,27 @@ def test_atom_name_to_seq_multiple_chains():
     assert seqs == ['AC', 'GXF']
 
 def test_parse_pdb_single_file():
-    pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures", "alanine.pdb")
+    pdb_file = "tests/reference_data/alanine.pdb"
     coords, atom_names, _ = utils.parse_pdb(pdb_file)
     assert coords.shape[0] == 1
     assert len(atom_names) == 1
 
 def test_parse_pdb_directory():
-    pdb_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures")
+    pdb_dir = "tests/reference_data/"
     coords, atom_names, pdb_names = utils.parse_pdb(pdb_dir)
-    assert coords.shape[0] == 1
-    assert len(atom_names) == 1
-    assert pdb_names == ['alanine']
+    assert coords.shape[0] > 1
+    assert len(atom_names) > 1
+    assert 'alanine' in pdb_names
 
 def test_parse_pdb_bb_only():
-    pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures", "alanine.pdb")
+    pdb_file = "tests/reference_data/alanine.pdb"
     coords, atom_names, _ = utils.parse_pdb(pdb_file, bb_only=True)
-    assert len(atom_names[0]) == 27 # 9 residues * 3 backbone atoms
+    assert len(atom_names[0]) == 3 * 9 # 9 residues * 3 backbone atoms
     for atom in atom_names[0]:
         assert atom.split('_')[2] in ['N', 'CA', 'C']
 
 def test_parse_pdb_keep_only_chains():
-    pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures", "alanine.pdb")
+    pdb_file = "tests/reference_data/alanine.pdb"
     # This pdb only has chain A, so testing with a different chain should result in 0 atoms
     coords, atom_names, _ = utils.parse_pdb(pdb_file, keep_only_chains="B")
     assert len(atom_names[0]) == 0

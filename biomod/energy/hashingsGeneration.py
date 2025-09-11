@@ -17,7 +17,7 @@ import os
 import pickle
 import torch
 
-from vitra.sources.globalVariables import PADDING_INDEX
+from biomod.config import MISSING_INDEX as PADDING_INDEX
 
 
 def generate_atom_hashing():
@@ -94,8 +94,8 @@ def generateTensorMappings(atom_hash, property_hashings, property_hashingsFake):
 
     numberOfFakeProperties = len(property_hashingsFake.keys())
 
-    atom_properties = torch.full((maxAtomNumber, numberOfProperties), PADDING_INDEX)
-    fake_atom_Properties = torch.full((maxAtomNumber, nH + nFO, numberOfFakeProperties), PADDING_INDEX)
+    atom_properties = torch.full((maxAtomNumber, numberOfProperties), PADDING_INDEX, dtype=torch.float)
+    fake_atom_Properties = torch.full((maxAtomNumber, nH + nFO, numberOfFakeProperties), PADDING_INDEX, dtype=torch.float)
 
     virtual_atom_list = {"NE2H1S", "NE2H2S", "ND1H1S", "ND1H2S", "Ncp", "Ccp", "RE", "RC", "ARG"}
     culo = []

@@ -1,4 +1,4 @@
-from vitra.energies.solvatation import Solvatation
+from biomod.energy.solvatation import Solvatation
 
 def test_solvation_instantiation():
     """

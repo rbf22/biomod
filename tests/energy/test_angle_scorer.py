@@ -1,4 +1,4 @@
-from vitra.energies.angle_scorer import AngleScorerEnergy
+from biomod.energy.angle_scorer import AngleScorerEnergy
 
 def test_angle_scorer_instantiation():
     """

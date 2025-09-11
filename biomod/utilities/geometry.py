@@ -4,9 +4,9 @@ constituent libraries.
 """
 import torch
 import numpy as np
-from . import math_utils
-from .. import hashings
-from .. import global_variables
+from ..energy import math_utils
+from ..energy import hashings
+from ..config import PADDING_INDEX
 
 # --- Functions from pypulchra (`biomod/utilities/geometry.py`) ---
 
@@ -61,6 +61,22 @@ def calc_distance(p1, p2):
     """Calculates the distance between two points."""
     return np.linalg.norm(p1 - p2)
 
+def _generate_fibonacci_sphere(num_points: int):
+    """
+    Creates equidistant points on the surface of a sphere using Fibonacci sphere algorithm.
+    """
+    ga = (3 - np.sqrt(5)) * np.pi # golden angle
+    # Create a list of golden angle increments along tha range of number of points
+    theta = ga * np.arange(num_points)
+    # Z is a split into a range of -1 to 1 in order to create a unit circle
+    z = np.linspace(1/num_points-1, 1-1/num_points, num_points)
+    # a list of the radii at each height step of the unit circle
+    radius = np.sqrt(1 - z * z)
+    # Determine where xy fall on the sphere, given the azimuthal and polar angles
+    y = radius * np.sin(theta)
+    x = radius * np.cos(theta)
+    return np.array(list(zip(x, y, z))), 1.0
+
 def calc_torsion(a1, a2, a3, a4):
     """Calculates the torsion angle between four points."""
     v12 = a1 - a2
@@ -76,6 +92,8 @@ def calc_torsion(a1, a2, a3, a4):
 
     angle = np.degrees(np.arctan2(v, u))
     return angle
+
+dihedral_angle = calc_torsion
 
 def rot_point_vector(p, v, angle):
     """Rotates a point around a vector."""
@@ -283,10 +301,10 @@ def calculateTorsionAngles(coords_tot, atom_description, angle_coords, float_typ
 
     batch_ind = torch.arange(0, batch, device=coords_tot.device).unsqueeze(1).expand(batch, L)
 
-    anglesFull = torch.full((batch, max_chain_ind, maxResi, 9, 3), global_variables.PADDING_INDEX, device=coords_tot.device,
+    anglesFull = torch.full((batch, max_chain_ind, maxResi, 9, 3), PADDING_INDEX, device=coords_tot.device,
                             dtype=float_type)
 
-    padding_mask = ~(resi == global_variables.PADDING_INDEX)
+    padding_mask = ~(resi == PADDING_INDEX)
 
     nMask = n_hahsingMask & padding_mask
     full_ind = (batch_ind[nMask].long(), chain_ind[nMask], resi[nMask].long(),
@@ -318,7 +336,7 @@ def calculateTorsionAngles(coords_tot, atom_description, angle_coords, float_typ
                 torch.full(batch_ind.shape, 5, device=coords_tot.device, dtype=torch.long)[ca_minus_oneMaks])
     anglesFull = anglesFull.index_put_(full_ind, coords[ca_minus_oneMaks])
 
-    residue_padding_mask = ~(anglesFull[:, :, :, :, 0] == global_variables.PADDING_INDEX)
+    residue_padding_mask = ~(anglesFull[:, :, :, :, 0] == PADDING_INDEX)
 
     everythingForPhi = residue_padding_mask[:, :, :, (3, 0, 1, 2)].prod(dim=-1).bool()
     phi_angles = anglesFull[everythingForPhi]
@@ -334,20 +352,20 @@ def calculateTorsionAngles(coords_tot, atom_description, angle_coords, float_typ
                                             omega_angles[:, 5])
 
     # full angles #
-    phiFull = torch.full((batch, max_chain_ind, maxResi), global_variables.PADDING_INDEX, device=coords_tot.device)
-    psiFull = torch.full((batch, max_chain_ind, maxResi), global_variables.PADDING_INDEX, device=coords_tot.device)
-    omegaFull = torch.full((batch, max_chain_ind, maxResi), global_variables.PADDING_INDEX, device=coords_tot.device)
+    phiFull = torch.full((batch, max_chain_ind, maxResi), PADDING_INDEX, device=coords_tot.device)
+    psiFull = torch.full((batch, max_chain_ind, maxResi), PADDING_INDEX, device=coords_tot.device)
+    omegaFull = torch.full((batch, max_chain_ind, maxResi), PADDING_INDEX, device=coords_tot.device)
 
     phiFull[everythingForPhi] = phi.squeeze(-1)
     psiFull[everythingForPsi] = psi.squeeze(-1)
     omegaFull[everythingForOmega] = omega.squeeze(-1)
 
-    sidechain_todo = (~(angle_coords[:, :, :, :, 0].eq(global_variables.PADDING_INDEX))).prod(-1).bool()
+    sidechain_todo = (~(angle_coords[:, :, :, :, 0].eq(PADDING_INDEX))).prod(-1).bool()
     # calculate angles for which all atoms are present
     todo = angle_coords[sidechain_todo]
     sidechain, _ = math_utils.dihedral2dVectors(todo[:, 0], todo[:, 1], todo[:, 2], todo[:, 3])
 
-    fullanglesSC = torch.full((batch, max_chain_ind, maxResi, 5), global_variables.PADDING_INDEX).type_as(sidechain)
+    fullanglesSC = torch.full((batch, max_chain_ind, maxResi, 5), PADDING_INDEX).type_as(sidechain)
     fullanglesSC[sidechain_todo] = sidechain.squeeze(-1)
     fullangles = torch.cat([phiFull.unsqueeze(-1), psiFull.unsqueeze(-1), omegaFull.unsqueeze(-1), fullanglesSC], dim=3)
 
@@ -386,12 +404,12 @@ def calculateTorsionAnglesBuildModels(coords_tot, atom_description, angle_coords
 
     batch_ind = torch.arange(0, batch, device=coords_tot.device).unsqueeze(1).expand(batch, L)
 
-    anglesFull = torch.full((batch, max_chain_ind, maxResi, 9, nrots, 3), global_variables.PADDING_INDEX, device=coords_tot.device,
+    anglesFull = torch.full((batch, max_chain_ind, maxResi, 9, nrots, 3), PADDING_INDEX, device=coords_tot.device,
                             dtype=float_type)
 
     fullangles = []
     for alt in range(max_alternatives):
-        padding_mask = ~(resi == global_variables.PADDING_INDEX) & alternatives[:, :, alt]
+        padding_mask = ~(resi == PADDING_INDEX) & alternatives[:, :, alt]
 
         alternative_Resi_mask = alternative_resi[:, :, alt]
         nMask = n_hahsingMask & padding_mask
@@ -426,7 +444,7 @@ def calculateTorsionAnglesBuildModels(coords_tot, atom_description, angle_coords
             torch.full(batch_ind.shape, 5, device=coords_tot.device, dtype=torch.long)[ca_minus_oneMaks])
         anglesFull = anglesFull.index_put_(full_ind, coords[ca_minus_oneMaks])
 
-        residue_padding_mask = ~(anglesFull[:, :, :, :, :, 0] == global_variables.PADDING_INDEX)
+        residue_padding_mask = ~(anglesFull[:, :, :, :, :, 0] == PADDING_INDEX)
 
         everythingForPhi = residue_padding_mask[:, :, :, (3, 0, 1, 2)].prod(dim=-2).bool()
         phi_angles = anglesFull.transpose(-2, -3)[everythingForPhi]
@@ -442,16 +460,16 @@ def calculateTorsionAnglesBuildModels(coords_tot, atom_description, angle_coords
                                                 omega_angles[:, 5])
 
         # full angles #
-        phiFull = torch.full((batch, max_chain_ind, maxResi, nrots), global_variables.PADDING_INDEX, device=coords_tot.device)
-        psiFull = torch.full((batch, max_chain_ind, maxResi, nrots), global_variables.PADDING_INDEX, device=coords_tot.device)
-        omegaFull = torch.full((batch, max_chain_ind, maxResi, nrots), global_variables.PADDING_INDEX, device=coords_tot.device)
+        phiFull = torch.full((batch, max_chain_ind, maxResi, nrots), PADDING_INDEX, device=coords_tot.device)
+        psiFull = torch.full((batch, max_chain_ind, maxResi, nrots), PADDING_INDEX, device=coords_tot.device)
+        omegaFull = torch.full((batch, max_chain_ind, maxResi, nrots), PADDING_INDEX, device=coords_tot.device)
 
         phiFull[everythingForPhi] = phi.squeeze(-1)
         psiFull[everythingForPsi] = psi.squeeze(-1)
         omegaFull[everythingForOmega] = omega.squeeze(-1)
 
         alterAngleCoords = angle_coords[alternative_Resi_mask]
-        sidechain_todo = (~(alterAngleCoords[:, :, :, :, 0].eq(global_variables.PADDING_INDEX))).prod(-1).bool()
+        sidechain_todo = (~(alterAngleCoords[:, :, :, :, 0].eq(PADDING_INDEX))).prod(-1).bool()
 
         # calculate angles for which all atoms are present
         todo = alterAngleCoords[sidechain_todo]
@@ -475,7 +493,7 @@ def calculateTorsionAnglesBuildModels(coords_tot, atom_description, angle_coords
                 sidechain_todo]
         indices = (batch_SC, chain_SC, resi_SC, numrot, numtor)
 
-        fullanglesSC = torch.full((batch, max_chain_ind, maxResi, nrots, 5), global_variables.PADDING_INDEX).type_as(sidechain)
+        fullanglesSC = torch.full((batch, max_chain_ind, maxResi, nrots, 5), PADDING_INDEX).type_as(sidechain)
         fullanglesSC.index_put_(indices, sidechain.squeeze(-1))
 
         fullangles += [torch.cat([phiFull.unsqueeze(-1), psiFull.unsqueeze(-1), omegaFull.unsqueeze(-1), fullanglesSC],

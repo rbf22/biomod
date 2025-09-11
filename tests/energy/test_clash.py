@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from vitra.energies.clash_net import ClashEnergy
+from biomod.energy.clash_net import ClashEnergy
 
 def test_clash_penalty():
     """

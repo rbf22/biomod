@@ -2,8 +2,8 @@
 This module contains functions for calculating secondary structure elements
 like beta sheets and helices.
 """
-from .core import (
-    Residue,
+from ...core.residues import Residue
+from .data_structures import (
     Bridge,
     BridgeType,
     StructureType,

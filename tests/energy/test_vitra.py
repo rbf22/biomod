@@ -6,9 +6,9 @@ import time
 import os
 import torch
 
-import vitra.data_structures as data_structures
-import vitra.utils as utils
-from vitra.ForceField import ForceField
+from biomod.energy import vitra_tensors as data_structures
+from biomod.utilities import utils
+from biomod.energy.force_field import ForceField
 
 
 def test():

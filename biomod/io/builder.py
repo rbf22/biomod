@@ -224,6 +224,7 @@ def data_dict_to_file(data_dict, filetype):
     :param str filetype: the file type that is being converted.
     :rtype: ``File``"""
 
+    print("Converting data_dict to file")
     f = File(filetype)
     for key in data_dict.keys():
         if key != "models":
@@ -241,6 +242,7 @@ def model_dict_to_model(model_dict):
     :rtype: ``Model``"""
 
 
+    print("Converting model_dict to model")
     chains = create_chains(model_dict)
     ligands = create_ligands(model_dict, chains)
     waters = create_ligands(model_dict, chains, water=True)

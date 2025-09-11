@@ -1,10 +1,10 @@
-import atomium
+from biomod.io import io
 from unittest import TestCase
 
 class MmcifFileDictReadingTests(TestCase):
 
     def test_1lol_file_dict(self):
-        d = atomium.open("tests/integration/files/1lol.cif", file_dict=True)
+        d = io.open("tests/io/integration/files/1lol.cif", file_dict=True)
         self.assertEqual(d["entry"], [{"id": "1LOL"}])
         self.assertEqual(d["audit_author"], [
          {"name": "Wu, N.", "pdbx_ordinal": "1"},
@@ -31,7 +31,7 @@ class MmcifFileDictReadingTests(TestCase):
 class MmtfFileDictReadingTests(TestCase):
 
     def test_1lol_file_dict(self):
-        d = atomium.open("tests/integration/files/1lol.mmtf", file_dict=True)
+        d = io.open("tests/io/integration/files/1lol.mmtf", file_dict=True)
         self.assertEqual(d["mmtfVersion"], "1.0.0")
         self.assertEqual(len(d["unitCell"]), 6)
         self.assertAlmostEqual(d["unitCell"][0], 57.57, delta=0.00005)
@@ -52,7 +52,7 @@ class MmtfFileDictReadingTests(TestCase):
 
 
     def test_1igt_file_dict(self):
-        d = atomium.open("tests/integration/files/1igt.mmtf", file_dict=True)
+        d = io.open("tests/io/integration/files/1igt.mmtf", file_dict=True)
         self.assertEqual(d["mmtfVersion"], "1.0.0")
         self.assertEqual(d["insCodeList"][266], "A")
 
@@ -61,7 +61,7 @@ class MmtfFileDictReadingTests(TestCase):
 class PdbFileDictReadingTests(TestCase):
 
     def test_1lol_file_dict(self):
-        d = atomium.open("tests/integration/files/1lol.pdb", file_dict=True)
+        d = io.open("tests/io/integration/files/1lol.pdb", file_dict=True)
         self.assertEqual(d["HEADER"], [
          "HEADER    LYASE                                   06-MAY-02   1LOL"
         ])
@@ -80,7 +80,7 @@ class PdbFileDictReadingTests(TestCase):
 
 
     def test_5xme_file_dict(self):
-        d = atomium.open("tests/integration/files/5xme.pdb", file_dict=True)
+        d = io.open("tests/io/integration/files/5xme.pdb", file_dict=True)
         self.assertEqual(d["HEADER"], [
          "HEADER    APOPTOSIS                               15-MAY-17   5XME"
         ])

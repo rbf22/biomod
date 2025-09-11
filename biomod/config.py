@@ -172,3 +172,11 @@ MISSING_ATOM = -999
 NON_ACCEPTABLE_ENERGY = 999
 NON_ACCEPTABLE_DISTANCE = 999
 MISSING_INDEX = -1
+PADDING_INDEX = -1
+EPS = 1e-6
+
+# --- Constants for PDB file format ---
+PDB_ATOM_LINE = "ATOM  %5d %-4s %3s %1s%4d    %8.3f%8.3f%8.3f%6.2f%6.2f          %2s  "
+PDB_TER_LINE = "TER   %5d      %3s %1s%4d"
+PDB_END_LINE = "END"
+TEMPERATURE = 298.15

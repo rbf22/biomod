@@ -1,13 +1,13 @@
 from datetime import date
 import re
-import atomium
+from biomod.io import io
 from unittest import TestCase
 
 class DataDictTest(TestCase):
 
     def open(self, name):
-        return {e: atomium.open(
-         f"tests/integration/files/{name}.{e}", data_dict=True
+        return {e: io.open(
+         f"tests/io/integration/files/{name}.{e}", data_dict=True
         ) for e in ("cif", "mmtf", "pdb")}
     
 
