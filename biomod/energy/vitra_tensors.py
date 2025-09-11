@@ -7,8 +7,8 @@ import time
 from dataclasses import dataclass
 import torch
 
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX
+from . import hashings
+from ..config import PADDING_INDEX
 
 TORSION_ANGLE_HASHINGS = {
     "phi": 0, "psi": 1, "omega": 2, "chi1": 3, "chi2": 4,

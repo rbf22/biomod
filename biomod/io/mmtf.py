@@ -4,7 +4,8 @@ import msgpack
 import struct
 from datetime import datetime
 from .mmcif import get_structure_from_atom, create_entities, split_residue_id
-from .structures import Chain, Ligand
+from ..core.base import Chain
+from ..core.residues import Ligand
 
 def mmtf_bytes_to_mmtf_dict(bytestring):
     """Takes the raw bytestring of a .mmtf file and turns it into a normal,

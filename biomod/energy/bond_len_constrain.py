@@ -4,8 +4,8 @@
 import math
 import torch
 
-from vitra.sources import hashings, math_utils
-from vitra.sources.globalVariables import PADDING_INDEX, EPS
+from . import hashings, math_utils
+from ..config import PADDING_INDEX, EPS
 
 
 class BondLengthConstraintEnergy(torch.nn.Module):

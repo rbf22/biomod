@@ -22,7 +22,7 @@ import logging
 
 import networkx as nx
 
-from .smiles_helper import remove_explicit_hydrogens, format_atom
+from .smiles import remove_explicit_hydrogens, format_atom
 
 LOGGER = logging.getLogger(__name__)
 

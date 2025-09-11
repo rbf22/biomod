@@ -5,7 +5,9 @@ import re
 from datetime import datetime
 import numpy as np
 import valerius
-from .data import CODES, Chain, Residue, Ligand
+from ..core.constants import CODES
+from ..core.base import Chain
+from ..core.residues import Residue, Ligand
 
 def mmcif_string_to_mmcif_dict(filestring):
     """Takes a .cif filestring and turns into a ``dict`` which represents its

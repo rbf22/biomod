@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import torch
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX, TEMPERATURE
+from . import hashings
+from ..config import PADDING_INDEX, TEMPERATURE
 
 LETTERS = {
     'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K', 'ASN': 'N',

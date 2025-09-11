@@ -24,8 +24,8 @@
 
 import torch
 
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX
+from . import hashings
+from ..config import PADDING_INDEX
 
 class Vdw(torch.nn.Module):
     r"""

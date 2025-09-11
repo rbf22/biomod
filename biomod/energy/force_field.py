@@ -4,14 +4,20 @@
 import os
 import torch
 
-from vitra.sources import hashings
-from vitra.sources import math_utils
-from vitra.energies import AngleScorerEnergy, BondLengthConstraintEnergy, ClashEnergy, DisulfideEnergy, ElectrostaticsEnergy, \
-    SideChainEntropyEnergy, HBondNet, Solvatation, SolventAccessibility, Vdw
-from vitra.energies.disulfide_net import DisulfideData
-from vitra.energies.electro_net import ElectrostaticsData
-from vitra.sources import fakeAtomsGeneration
-from vitra.sources.globalVariables import PADDING_INDEX
+from . import hashings
+from . import math_utils
+from .angle_scorer import AngleScorerEnergy
+from .bond_len_constrain import BondLengthConstraintEnergy
+from .clash_net import ClashEnergy
+from .disulfide_net import DisulfideEnergy, DisulfideData
+from .electro_net import ElectrostaticsEnergy, ElectrostaticsData
+from .entropy_sc import SideChainEntropyEnergy
+from .hbond_net import HBondNet
+from .solvatation import Solvatation
+from .solvent_accessibility import SolventAccessibility
+from .vdw import Vdw
+from .fake_atoms import generateFakeAtomTensor
+from ..config import PADDING_INDEX
 
 HBOND_DONORS_SIDECHAIN = {
     "ARG": ["NE", "NH1", "NH2"], "ASN": ["ND2"], "GLN": ["NE2"],
@@ -51,7 +57,7 @@ class ForceField(torch.nn.Module):
         self.device = device
         self._initialize_atom_sets()
         weights_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                    "parameters", "final_model.weights")
+                                    "..", "parameters", "final_model.weights")
         self.load_state_dict(torch.load(weights_path, map_location=device), strict=False)
 
     def _initialize_atom_sets(self):
@@ -128,7 +134,7 @@ class ForceField(torch.nn.Module):
         coords = coordinates[atom_description[:, 0].long(), coords_indexing_atom]
         partners_final = torch.cat([partners_final1.unsqueeze(1), partners_final2.unsqueeze(1)], dim=1)
 
-        fake_atoms = fakeAtomsGeneration.generateFakeAtomTensor(coords, partners_final, atom_description,
+        fake_atoms = generateFakeAtomTensor(coords, partners_final, atom_description,
                                                                hashings.fake_atom_Properties.to(self.device))
 
         independent_groups = atom_description[:, hashings.atom_description_hash["batch"]]

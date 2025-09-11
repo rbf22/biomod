@@ -4,8 +4,8 @@ This module contains functions for calculating solvent accessibility of residues
 from dataclasses import dataclass
 import numpy as np
 
-from .core import Residue
-from .constants import (
+from ..core.residues import Residue
+from ..config import (
     RADIUS_N,
     RADIUS_CA,
     RADIUS_C,

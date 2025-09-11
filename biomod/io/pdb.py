@@ -5,8 +5,8 @@ import re
 from itertools import groupby, chain
 import valerius
 from math import ceil
-from .data import CODES
-from .structures import Residue, Ligand
+from ..core.constants import CODES
+from ..core.residues import Residue, Ligand
 from .mmcif import add_secondary_structure_to_polymers
 
 def pdb_string_to_pdb_dict(filestring):

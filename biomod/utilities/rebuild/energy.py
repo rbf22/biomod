@@ -1,5 +1,5 @@
 import math
-from . import constants
+from ... import config as constants
 
 def calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, alpha, ene, calc_gradient, ca_start_dist):
     """

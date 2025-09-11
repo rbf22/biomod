@@ -1,7 +1,9 @@
 """Contains logic for turning data dictionaies into a parsed Python objects."""
 
-from .structures import Atom, Residue, Ligand, Chain, Model
-from .constants import *
+from ..core.atoms import Atom
+from ..core.residues import Residue, Ligand
+from ..core.base import Chain, Model
+from ..core.constants import *
 
 class File:
     """When a file is parsed, the result is a ``File``. It contains the

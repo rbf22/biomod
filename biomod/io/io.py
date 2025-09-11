@@ -3,7 +3,8 @@ This module handles reading of PDB and mmCIF files.
 """
 
 from Bio.PDB import PDBParser, MMCIFParser
-from .core import Residue, ChainBreakType
+from ..core.residues import Residue
+from ..utilities.secondary_structure.data_structures import ChainBreakType
 
 def extract_residues(structure):
     """Extracts and numbers residues from a Biopython structure.

@@ -1,0 +1,174 @@
+"""
+This file contains the consolidated configuration and constants for the biomod library.
+It merges constants from various legacy sources into a single, organized file.
+"""
+import math
+
+# --- Constants from legacy `constants_another.py` (Core biochemical data) ---
+
+PERIODIC_TABLE = {
+ "H": 1.0079, "HE": 4.0026, "LI": 6.941, "BE": 9.0122, "B": 10.811,
+ "C": 12.0107, "N": 14.0067, "O": 15.9994, "F": 18.9984, "NE": 20.1797,
+ "NA": 22.9897, "MG": 24.305, "AL": 26.9815, "SI": 28.0855, "P": 30.9738,
+ "S": 32.065, "CL": 35.453, "K": 39.0983, "AR": 39.948, "CA": 40.078,
+ "SC": 44.9559, "TI": 47.867, "V": 50.9415, "CR": 51.9961, "MN": 54.938,
+ "FE": 55.845, "NI": 58.6934, "CO": 58.9332, "CU": 63.546, "ZN": 65.39,
+ "GA": 69.723, "GE": 72.64, "AS": 74.9216, "SE": 78.96, "BR": 79.904,
+ "KR": 83.8, "RB": 85.4678, "SR": 87.62, "Y": 88.9059, "ZR": 91.224,
+ "NB": 92.9064, "MO": 95.94, "TC": 98, "RU": 101.07, "RH": 102.9055,
+ "PD": 106.42, "AG": 107.8682, "CD": 112.411, "IN": 114.818, "SN": 118.71,
+ "SB": 121.76, "I": 126.9045, "TE": 127.6, "XE": 131.293, "CS": 132.9055,
+ "BA": 137.327, "LA": 138.9055, "CE": 140.116, "PR": 140.9077, "ND": 144.24,
+ "PM": 145, "SM": 150.36, "EU": 151.964, "GD": 157.25, "TB": 158.9253,
+ "DY": 162.5, "HO": 164.9303, "ER": 167.259, "TM": 168.9342, "YB": 173.04,
+ "LU": 174.967, "HF": 178.49, "TA": 180.9479, "W": 183.84, "RE": 186.207,
+ "OS": 190.23, "IR": 192.217, "PT": 195.078, "AU": 196.9665, "HG": 200.59,
+ "TL": 204.3833, "PB": 207.2, "BI": 208.9804, "PO": 209, "AT": 210, "RN": 222,
+ "FR": 223, "RA": 226, "AC": 227, "PA": 231.0359, "TH": 232.0381, "NP": 237,
+ "U": 238.0289, "AM": 243, "PU": 244, "CM": 247, "BK": 247, "CF": 251,
+ "ES": 252, "FM": 257, "MD": 258, "NO": 259, "RF": 267, "LR": 266, "DB": 268,
+ "BH": 270, "SG": 269, "MT": 278, "RG": 282, "HS": 277
+}
+
+ATOMIC_NUMBER = {
+ "H": 1, "HE": 2,
+ "LI": 3, "BE": 4, "B": 5, "C": 6, "N": 7, "O": 8, "F": 9, "NE": 10,
+ "NA": 11, "MG": 12, "AL": 13, "SI": 14, "P": 15, "S": 16, "CL": 17, "AR": 18,
+ "K": 19, "CA": 20, "SC": 21, "TI": 22, "V": 23, "CR": 24, "MN": 25, "FE": 26,
+ "CO": 27, "NI": 28, "CU": 29, "ZN": 30, "GA": 31, "GE": 32, "AS": 33,
+ "SE": 34, "BR": 35, "KR": 36, "RB": 37, "SR": 38, "Y": 39, "ZR": 40, "NB": 41,
+ "MO": 42, "TC": 43, "RU": 44, "RH": 45, "PD": 46, "AG": 47, "CD": 48,
+ "IN": 49, "SN": 50, "SB": 51, "TE": 52, "I": 53, "XE": 54, "CS": 55, "BA": 56,
+ "LA": 57, "CE": 58, "PR": 59, "ND": 60, "PM": 61, "SM": 62, "EU": 63,
+ "GD": 64, "TB": 65, "DY": 66, "HO": 67, "ER": 68, "TM": 69, "YB": 70,
+ "LU": 71, "HF": 72, "TA": 73, "W": 74, "RE": 75, "OS": 76, "IR": 77, "PT": 78,
+ "AU": 79, "HG": 80, "TL": 81, "PB": 82, "BI": 83, "PO": 84, "AT": 85,
+ "RN": 86, "FR": 87, "RA": 88, "AC": 89, "TH": 90, "PA": 91, "U": 92, "NP": 93,
+ "PU": 94, "AM": 95, "CM": 96, "BK": 97, "CF": 98, "ES": 99, "FM": 100,
+ "MD": 101, "NO": 102, "LR": 103, "RF": 104, "DB": 105, "SG": 106, "BH": 107,
+ "HS": 108, "MT": 109, "RG": 111
+}
+
+COVALENT_RADII = {
+ "H": 0.31, "HE": 0.28, "LI": 1.28, "BE": 0.96, "B": 0.85, "C": 0.76,
+ "N": 0.71, "O": 0.66, "F": 0.57, "NE": 0.58, "NA": 1.66, "MG": 1.41,
+ "AL": 1.21, "SI": 1.11, "P": 1.07, "S": 1.05, "CL": 1.02, "AR": 1.06,
+ "K": 2.03, "CA": 1.76, "SC": 1.7, "TI": 1.6, "V": 1.53, "CR": 1.39, "MN": 1.39,
+ "FE": 1.32, "CO": 1.26, "NI": 1.24, "CU": 1.32, "ZN": 1.22, "GA": 1.22,
+ "GE": 1.2, "AS": 1.19, "SE": 1.2, "BR": 1.2, "KR": 1.16, "RB": 2.2, "SR": 1.95,
+ "Y": 1.9, "ZR": 1.75, "NB": 1.64, "MO": 1.54, "TC": 1.47, "RU": 1.46,
+ "RH": 1.42, "PD": 1.39, "AG": 1.45, "CD": 1.44, "IN": 1.42, "SN": 1.39,
+ "SB": 1.39, "TE": 1.38, "I": 1.39, "XE": 1.4, "CS": 2.44, "BA": 2.15,
+ "LA": 2.07, "CE": 2.04, "PR": 2.03, "ND": 2.01, "PM": 1.99, "SM": 1.98,
+ "EU": 1.98, "GD": 1.96, "TB": 1.94, "DY": 1.92, "HO": 1.92, "ER": 1.89,
+ "TM": 1.9, "YB": 1.87, "LU": 1.87, "HF": 1.75, "TA": 1.7, "W": 1.62,
+ "RE": 1.51, "OS": 1.44, "IR": 1.41, "PT": 1.36, "AU": 1.36, "HG": 1.32,
+ "TL": 1.45, "PB": 1.46, "BI": 1.48, "PO": 1.4, "AT": 1.5, "RN": 1.5, "FR": 2.6,
+ "RA": 2.21, "AC": 2.15, "TH": 2.06, "PA": 2.0, "U": 1.96, "NP": 1.9,
+ "PU": 1.87, "AM": 1.8, "CM": 1.69
+}
+
+METALS = [
+ "LI", "BE", "NA", "MG", "AL", "K", "CA", "SC", "TI", "V", "CR", "MN", "FE",
+ "CO", "NI", "CU", "ZN", "HA", "RB", "SR", "Y", "ZR", "NB", "MO", "TC", "RU",
+ "RH", "PD", "AG", "CD", "IN", "SN", "CS", "BA", "LA", "CE", "PR", "ND", "PM",
+ "SM", "EU", "GD", "TB", "DY", "HO", "ER", "TM", "YB", "LU", "HF", "TA", "W",
+ "RE", "OS", "IR", "PT", "AU", "HG", "TL", "PB", "BI", "PO", "FR", "RA", "AC",
+ "TH", "PA", "U", "NP", "PU", "AM", "CM", "BK", "CF", "ES", "FM", "MD", "NO",
+ "LR", "RF", "DB", "SG", "BH", "HS", "MT", "DS", "RG", "CN", "UUT", "FL", "LV"
+]
+
+FULL_NAMES = {
+ "GLY": "glycine", "ALA": "alanine", "VAL": "valine", "LEU": "leucine",
+ "ILE": "isoleucine", "MET": "methionine", "PHE": "phenylalanine",
+ "TRP": "tryptophan", "PRO": "proline", "SER": "serine", "THR": "threonine",
+ "CYS": "cysteine", "TYR": "tyrosine", "ASN": "asparagine", "GLN": "glutamine",
+ "ASP": "aspartic acid", "GLU": "glutamic acid", "LYS": "lysine",
+ "ARG": "arginine", "HIS": "histidine", "HOH": "water"
+}
+
+CODES = {
+ "VAL": "V", "ILE": "I", "LEU": "L", "GLU": "E", "GLN": "Q", "ASP": "D",
+ "ASN": "N", "HIS": "H", "TRP": "W", "PHE": "F", "TYR": "Y", "ARG": "R",
+ "LYS": "K", "SER": "S", "THR": "T", "MET": "M", "ALA": "A", "GLY": "G",
+ "PRO": "P", "CYS": "C", "HIP": "H", "HIE": "H",
+ "DA": "A", "DG": "G", "DC": "C", "DT": "T", "A": "A", "G": "G", "C": "C",
+ "U": "U"
+}
+
+CHI_ANGLES = {
+ "ARG": [
+  ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD"),
+  ("CB", "CG", "CD", "NE"), ("CG", "CD", "NE", "CZ"),
+  ("CD", "NE", "CZ", "NH1")
+ ],
+ "ASN": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "OD1")],
+ "ASP": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "OD1")],
+ "CYS": [("N", "CA", "CB", "SG")],
+ "GLN": [
+  ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD"),
+  ("CB", "CG", "CD", "OE1")
+ ],
+ "GLU": [
+  ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD"),
+  ("CB", "CG", "CD", "OE1")
+ ],
+ "HIS": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "ND1")],
+ "ILE": [("N", "CA", "CB", "CG1"), ("CA", "CB", "CG1", "CD")],
+ "LEU": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD1")],
+ "LYS": [
+  ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD"),
+  ("CB", "CG", "CD", "CE"), ("CG", "CD", "CE", "NZ")
+ ],
+ "MET": [
+  ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "SD"),
+  ("CB", "CG", "SD", "CE")
+ ],
+ "PHE": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD1")],
+ "PRO": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD")],
+ "SER": [("N", "CA", "CB", "OG")],
+ "THR": [("N", "CA", "CB", "OG1")],
+ "TRP": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD1")],
+ "TYR": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD1")],
+ "VAL": [("N", "CA", "CB", "CG1")]
+}
+
+# --- Constants from legacy `constants.py` (DSSP) ---
+
+RADIUS_N = 1.65
+RADIUS_CA = 1.87
+RADIUS_C = 1.76
+RADIUS_O = 1.40
+RADIUS_SIDE_ATOM = 1.80
+RADIUS_WATER = 1.40
+
+MINIMAL_DISTANCE = 0.5
+MIN_HBOND_ENERGY = -9.9
+COUPLING_CONSTANT = -27.888  # kcal/mol, = -332 * 0.42 * 0.2
+
+# --- Constants from legacy `constants_more.py` (Pulchra/Rebuild) ---
+
+# Energy constants
+CA_K = 10.0
+CA_ANGLE_K = 20.0
+CA_START_K = 0.01
+CA_XVOL_K = 10.00
+
+# Distance constants
+CA_DIST = 3.8
+CA_DIST_TOL = 0.1
+CA_DIST_CISPRO = 2.9
+CA_DIST_CISPRO_TOL = 0.1
+CA_XVOL_DIST = 3.5
+
+# Other constants
+RADDEG = 180.0 / math.pi
+DEGRAD = math.pi / 180.0
+
+# --- Constants from legacy `globalVariables.py` (Vitra) ---
+
+NONEXISTING_HASH = -1
+MISSING_ATOM = -999
+NON_ACCEPTABLE_ENERGY = 999
+NON_ACCEPTABLE_DISTANCE = 999
+MISSING_INDEX = -1

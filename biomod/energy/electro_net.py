@@ -4,9 +4,9 @@
 import math
 from dataclasses import dataclass
 import torch
-from vitra.sources.globalVariables import TEMPERATURE, PADDING_INDEX
-from vitra.sources import hashings
-from vitra import data_structures
+from ..config import TEMPERATURE, PADDING_INDEX
+from . import hashings
+from ..utilities.secondary_structure import data_structures
 
 DIELECTRIC = 8.8
 IONIC_STRENGTH = 0.05

@@ -25,8 +25,8 @@
 import math
 import torch
 
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX, TEMPERATURE, EPS
+from . import hashings
+from ..config import PADDING_INDEX, TEMPERATURE, EPS
 
 
 class Solvatation(torch.nn.Module):

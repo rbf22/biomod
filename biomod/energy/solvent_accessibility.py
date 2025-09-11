@@ -25,9 +25,9 @@
 import torch
 import numpy as np
 
-from vitra.sources.globalVariables import PADDING_INDEX, EPS
-from vitra.sources.math_utils import angle2dVectors
-from vitra.sources import hashings
+from ..config import PADDING_INDEX, EPS
+from .math_utils import angle2dVectors
+from . import hashings
 
 inverse_letters = {
     'C': 'CYS', 'D': 'ASP', 'S': 'SER', 'Q': 'GLN', 'K': 'LYS', 'N': 'ASN',

@@ -3,8 +3,8 @@
 
 import torch
 import numpy as np
-from vitra.sources.globalVariables import PADDING_INDEX
-from vitra.sources import hashings
+from ..config import PADDING_INDEX
+from . import hashings
 
 COVALENT_BONDS = [('O', 'N'), ('C', 'N'), ('C', 'CA'), ('O', 'CA'), ('CA', 'N')]
 PRO_COVALENT_BONDS = [('C', 'CD'), ('CA', 'CD')]

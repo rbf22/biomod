@@ -3,8 +3,8 @@ This module handles the output of DSSP files in the classic format.
 """
 
 import datetime
-from .core import HelixType, HelixPositionType
-from .utils import get_sheet_label
+from ..utilities.secondary_structure.data_structures import HelixType, HelixPositionType
+from ..utilities.utils import get_sheet_label
 
 # 3-to-1 letter code for amino acids
 AA_CODES = {

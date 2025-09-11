@@ -5,9 +5,9 @@ import os
 from dataclasses import dataclass
 import torch
 
-from vitra import data_structures
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX
+from ..utilities.secondary_structure import data_structures
+from ..energy import hashings
+from ..config import PADDING_INDEX
 
 
 @dataclass

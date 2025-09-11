@@ -3,8 +3,8 @@
 
 import torch
 from dataclasses import dataclass
-from vitra.sources import hashings
-from vitra.sources.globalVariables import TEMPERATURE
+from . import hashings
+from ..config import TEMPERATURE
 
 
 @dataclass

@@ -5,9 +5,9 @@ import os
 from dataclasses import dataclass
 import torch
 
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX
-from vitra.sources.kde import realNVP
+from . import hashings
+from ..config import PADDING_INDEX
+from .kde import realNVP
 
 @dataclass
 class ScoreData:

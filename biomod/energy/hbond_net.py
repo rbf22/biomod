@@ -26,10 +26,10 @@ import torch
 import math
 import numpy as np
 from torch import nn
-from vitra.sources import hashings
-from vitra.sources import math_utils
-from vitra.sources import select_best_virtualAtoms
-from vitra.sources.globalVariables import PADDING_INDEX, MISSING_ATOM, NON_ACCEPTABLE_ENERGY, TEMPERATURE
+from . import hashings
+from . import math_utils
+from ..utilities import select_best_virtualAtoms
+from ..config import PADDING_INDEX, MISSING_ATOM, NON_ACCEPTABLE_ENERGY, TEMPERATURE
 IonStrength = 0.05
 temperature = 298
 dielec = 8.8
