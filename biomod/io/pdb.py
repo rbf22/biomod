@@ -3,9 +3,8 @@
 from datetime import datetime
 import re
 from itertools import groupby, chain
-import valerius
 from math import ceil
-from ..core.constants import CODES
+from ..core.constants import CODES, ONE_TO_THREE
 from ..core.residues import Residue, Ligand
 from .mmcif import add_secondary_structure_to_polymers
 
@@ -644,7 +643,7 @@ def pack_sequences(structure, lines):
 
     try:
         for chain in sorted(structure.chains(), key=lambda c: c.id):
-            residues = valerius.from_string(chain.sequence).codes
+            residues = [ONE_TO_THREE.get(c, "UNK") for c in chain.sequence]
             length = len(residues)
             line_count = ceil(length / 13)
             for line_num in range(line_count):

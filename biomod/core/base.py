@@ -5,7 +5,6 @@ import numpy as np
 import rmsd
 import math
 import warnings
-from scipy.spatial.distance import cdist
 from collections import Counter, defaultdict
 
 def get_object_from_filter(obj, components):
@@ -487,7 +486,7 @@ class AtomStructure:
             atoms = self.atoms(*args, **kwargs)
         X = np.tile(location, [len(atoms), 1])
         Y = np.array([a.location for a in atoms])
-        distances = cdist(X, Y)[0]
+        distances = np.linalg.norm(Y - X, axis=1)
         return {a for index, a in enumerate(atoms) if distances[index] <= radius}
 
 

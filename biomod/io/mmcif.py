@@ -4,8 +4,7 @@ from collections import deque
 import re
 from datetime import datetime
 import numpy as np
-import valerius
-from ..core.constants import CODES
+from ..core.constants import CODES, ONE_TO_THREE
 from ..core.base import Chain
 from ..core.residues import Residue, Ligand
 
@@ -784,7 +783,7 @@ def update_lines_with_entities(lines, entities):
         for ei, entity in enumerate(entities, start=1):
             if isinstance(entity, Chain):
                 for ci, code in enumerate(
-                 valerius.from_string(entity.sequence).codes, start=1
+                 [ONE_TO_THREE.get(c, "UNK") for c in entity.sequence], start=1
                 ):
                     lines.append("{} {} {}".format(ei, ci, code))
 
