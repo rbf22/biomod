@@ -5,7 +5,7 @@ import os
 from dataclasses import dataclass
 import torch
 
-from ..utilities.secondary_structure import data_structures
+from ..energy import vitra_tensors as data_structures
 from ..energy import hashings
 from ..config import PADDING_INDEX
 

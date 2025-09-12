@@ -29,11 +29,16 @@ def calculate_h_bond_energy(donor: Residue, acceptor: Residue):
     energy = 0.0
     # Critical fix: Only calculate energy if donor is NOT proline
     # Proline cannot donate hydrogen bonds because its nitrogen is part of a ring
-    if donor.resname != "PRO":
-        dist_ho = np.linalg.norm(donor.h_coord - acceptor.o_coord)
-        dist_hc = np.linalg.norm(donor.h_coord - acceptor.c_coord)
-        dist_nc = np.linalg.norm(donor.n_coord - acceptor.c_coord)
-        dist_no = np.linalg.norm(donor.n_coord - acceptor.o_coord)
+    if donor.name != "PRO":
+        o_atom = acceptor.atom(name="O")
+        c_atom = acceptor.atom(name="C")
+        n_atom = donor.atom(name="N")
+        if o_atom is None or c_atom is None or n_atom is None:
+            return 0.0
+        dist_ho = np.linalg.norm(donor.h_coord - np.array(o_atom.location))
+        dist_hc = np.linalg.norm(donor.h_coord - np.array(c_atom.location))
+        dist_nc = np.linalg.norm(np.array(n_atom.location) - np.array(c_atom.location))
+        dist_no = np.linalg.norm(np.array(n_atom.location) - np.array(o_atom.location))
 
         if (
             dist_ho < MINIMAL_DISTANCE
@@ -86,14 +91,19 @@ def assign_hydrogen_to_residues(residues: list[Residue]):
     """
     for i, residue in enumerate(residues):
         # Start with nitrogen position
-        residue.h_coord = residue.n_coord.copy()
+        n_atom = residue.atom(name="N")
+        if n_atom is None:
+            continue
+        residue.h_coord = np.array(n_atom.location, dtype=float)
         # For non-proline residues with a previous residue
-        if residue.resname != "PRO" and i > 0:
+        if residue.name != "PRO" and i > 0:
             prev_residue = residues[i - 1]
-            prev_c = prev_residue.c_coord
-            prev_o = prev_residue.o_coord
+            prev_c = prev_residue.atom(name="C")
+            prev_o = prev_residue.atom(name="O")
+            if prev_c is None or prev_o is None:
+                continue
             # Calculate CO vector and normalize it
-            co_vector = prev_c - prev_o
+            co_vector = np.array(prev_c.location) - np.array(prev_o.location)
             co_distance = np.linalg.norm(co_vector)
             if co_distance > 0:
                 co_unit = co_vector / co_distance
@@ -120,14 +130,18 @@ def calculate_h_bonds(residues: list[Residue]) -> None:
     for res in residues:
         res.hbond_acceptor = [HBond(None, 0.0), HBond(None, 0.0)]
         res.hbond_donor = [HBond(None, 0.0), HBond(None, 0.0)]
+        res.h_coord = None
 
-    for res in residues:
-        res.assign_hydrogen()
+    assign_hydrogen_to_residues(residues)
 
     for i, res_i in enumerate(residues):
         for j in range(i + 1, len(residues)):
             res_j = residues[j]
-            if np.linalg.norm(res_i.ca_coord - res_j.ca_coord) > 9.0:
+            ca_i = res_i.atom(name="CA")
+            ca_j = res_j.atom(name="CA")
+            if ca_i is None or ca_j is None:
+                continue
+            if np.linalg.norm(np.array(ca_i.location) - np.array(ca_j.location)) > 9.0:
                 continue
 
             calculate_h_bond_energy(res_i, res_j)

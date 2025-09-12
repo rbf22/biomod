@@ -129,8 +129,12 @@ class Residue(Het, metaclass=StructureClass):
 
         Het.__init__(self, kwargs.get("id"), kwargs.get("name"),
          kwargs.get("full_name"), *atoms)
+        from ..utilities.secondary_structure.data_structures import HBond
         self._next, self._previous = None, None
         self._chain = None
+        self.hbond_acceptor = [HBond(None, 0.0), HBond(None, 0.0)]
+        self.hbond_donor = [HBond(None, 0.0), HBond(None, 0.0)]
+        self.h_coord = None
 
 
     def __repr__(self):
@@ -286,7 +290,7 @@ class Residue(Het, metaclass=StructureClass):
 
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms
+        from ..utilities.utils import find_downstream_atoms_in_residue
         current_angle = self.phi
         if current_angle is None: return
 
@@ -297,7 +301,7 @@ class Residue(Het, metaclass=StructureClass):
 
         axis = np.array(ca.location) - np.array(n.location)
         point = n.location
-        atoms_to_rotate = find_downstream_atoms(ca, n)
+        atoms_to_rotate = find_downstream_atoms_in_residue(ca, n)
         atoms_to_rotate = {a for a in atoms_to_rotate if a is not ca}
         Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
@@ -308,7 +312,7 @@ class Residue(Het, metaclass=StructureClass):
 
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms
+        from ..utilities.utils import find_downstream_atoms_in_chain
         current_angle = self.psi
         if current_angle is not None:
             delta = math.radians(angle - current_angle)
@@ -317,7 +321,7 @@ class Residue(Het, metaclass=StructureClass):
             if ca and c:
                 axis = np.array(c.location) - np.array(ca.location)
                 point = ca.location
-                atoms_to_rotate = find_downstream_atoms(c, ca)
+                atoms_to_rotate = find_downstream_atoms_in_chain(c, ca)
                 atoms_to_rotate = {a for a in atoms_to_rotate if a is not c}
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
@@ -328,7 +332,7 @@ class Residue(Het, metaclass=StructureClass):
 
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms
+        from ..utilities.utils import find_downstream_atoms_in_chain
         current_angle = self.omega
         if current_angle is not None:
             delta = math.radians(angle - current_angle)
@@ -337,7 +341,7 @@ class Residue(Het, metaclass=StructureClass):
             if c and n_next:
                 axis = np.array(n_next.location) - np.array(c.location)
                 point = c.location
-                atoms_to_rotate = find_downstream_atoms(n_next, c)
+                atoms_to_rotate = find_downstream_atoms_in_chain(n_next, c)
                 atoms_to_rotate = {a for a in atoms_to_rotate if a is not n_next}
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
@@ -349,7 +353,7 @@ class Residue(Het, metaclass=StructureClass):
         :param int n: The chi angle to set (1-5).
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms
+        from ..utilities.utils import find_downstream_atoms_in_residue
         current_angle = self.chi(n)
         if current_angle is not None:
             delta = math.radians(angle - current_angle)
@@ -360,7 +364,7 @@ class Residue(Het, metaclass=StructureClass):
             if b and c:
                 axis = np.array(c.location) - np.array(b.location)
                 point = b.location
-                atoms_to_rotate = find_downstream_atoms(c, b)
+                atoms_to_rotate = find_downstream_atoms_in_residue(c, b)
                 atoms_to_rotate = {a for a in atoms_to_rotate if a is not c}
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 

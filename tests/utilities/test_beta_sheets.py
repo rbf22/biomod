@@ -2,6 +2,7 @@
 Tests for the beta sheet calculation in the secondary_structure module.
 """
 from unittest.mock import Mock
+from biomod.core.atoms import Atom
 from biomod.utilities.secondary_structure.data_structures import BridgeType, Residue, StructureType, BridgePartner
 from biomod.utilities.secondary_structure import calculate_beta_sheets
 
@@ -20,13 +21,14 @@ def create_mock_bio_residue(res_num, chain_id='A', parent_mock=None):
 
 def create_mock_residue(res_num, chain_id='A', parent_mock=None):
     """Creates a mock residue object for testing."""
-    bio_res = create_mock_bio_residue(res_num, chain_id, parent_mock)
-    res = Residue(bio_res, res_num)
+    atom = Atom(element='C', x=0, y=0, z=0, id=1, name='CA', charge=0, bvalue=0, anisotropy=[])
+    res = Residue(atom, id=f"A.{res_num}", name="ALA")
     res.hbond_acceptor = []
     res.hbond_donor = []
     res.beta_partner = [BridgePartner(None, 0, False), BridgePartner(None, 0, False)]
     res.sheet = 0
     res.secondary_structure = StructureType.LOOP
+    res.chain = parent_mock
     return res
 
 def test_calculate_beta_sheets_empty_list():

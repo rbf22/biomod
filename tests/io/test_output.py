@@ -4,7 +4,7 @@ Tests for the output module.
 
 from unittest.mock import Mock
 from biomod.io.output import _format_header, format_dssp_line
-from biomod.io.io import read_cif
+from biomod.io import io
 from biomod.utilities.hbond import calculate_h_bonds
 from biomod.utilities.secondary_structure import calculate_beta_sheets
 from biomod.utilities.utils import get_sheet_label
@@ -58,8 +58,8 @@ def test_format_dssp_line_with_sheets():
     Tests that the sheet and bridge labels are correctly formatted in the output line.
     This is an integration test for calculate_beta_sheets and format_dssp_line.
     """
-    with open('test/reference_data/1cbs.cif', 'rt', encoding='utf-8') as f:
-        residues, _ = read_cif(f)
+    f = io.open('tests/reference_data/1cbs.cif')
+    residues = sorted(list(f.model.residues()), key=lambda r: r.id)
 
     # Run the algorithms that calculate sheet information
     calculate_h_bonds(residues)
@@ -68,7 +68,7 @@ def test_format_dssp_line_with_sheets():
     # Find a residue that is part of a bridge
     bridge_res = None
     for res in residues:
-        if res.beta_partner[0].residue is not None:
+        if hasattr(res, 'beta_partner') and res.beta_partner[0].residue is not None:
             bridge_res = res
             break
 

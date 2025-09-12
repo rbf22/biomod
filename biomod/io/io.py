@@ -1,12 +1,15 @@
 """
 This module handles reading of PDB and mmCIF files.
 """
+import builtins
+import gzip
 from . import pdb
 from . import mmcif
 from . import mmtf
 from ..core.base import Model, Chain
 from ..core.residues import Residue, Ligand
 from ..core.atoms import Atom
+from .builder import data_dict_to_file
 
 class PdbFile:
     def __init__(self, model):
@@ -18,26 +21,36 @@ def open(path, data_dict=False, file_dict=False):
     This function is a generic entry point that will delegate to the
     appropriate parser based on the file extension.
     """
-    extension = path.split(".")[-1]
+    path_str = str(path)
+    extension = path_str.split(".")[-1]
     if extension == "gz":
-        extension = path.split(".")[-2]
+        extension = path_str.split(".")[-2]
+    if extension == "ent":
+        extension = "pdb"
 
-    if extension == "mmtf":
-        with open(path, "rb") as f:
+    content = None
+    if path_str.endswith(".gz"):
+        with gzip.open(path_str, "rt") as f:
             content = f.read()
-        file_dict_data = mmtf.mmtf_bytes_to_mmtf_dict(content)
+    elif extension == "mmtf":
+        with builtins.open(path_str, "rb") as f:
+            content = f.read()
     else:
-        with open(path) as f:
+        with builtins.open(path_str) as f:
             content = f.read()
 
+    file_dict_data = {}
     if extension == "pdb":
         file_dict_data = pdb.pdb_string_to_pdb_dict(content)
     elif extension == "cif":
         file_dict_data = mmcif.mmcif_string_to_mmcif_dict(content)
+    elif extension == "mmtf":
+        file_dict_data = mmtf.mmtf_bytes_to_mmtf_dict(content)
 
     if file_dict:
         return file_dict_data
 
+    data_dict_data = {}
     if extension == "pdb":
         data_dict_data = pdb.pdb_dict_to_data_dict(file_dict_data)
     elif extension == "cif":
@@ -48,8 +61,7 @@ def open(path, data_dict=False, file_dict=False):
     if data_dict:
         return data_dict_data
 
-    model = data_dict_to_model(data_dict_data)
-    return PdbFile(model)
+    return data_dict_to_file(data_dict_data, extension)
 
 
 def data_dict_to_model(data_dict):
