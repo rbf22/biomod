@@ -4,4 +4,3 @@ numpy
 hypothesis
 networkx
 msgpack
-rmsd
