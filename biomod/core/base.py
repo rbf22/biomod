@@ -442,7 +442,7 @@ class AtomStructure:
 
         :param str path: the filename and location to save to."""
 
-        from ..utilities.utils import save
+        from ..io.utils import save as save_file
         self.check_ids()
         ext = path.split(".")[-1]
         if ext == "cif":
@@ -456,7 +456,7 @@ class AtomStructure:
             string = structure_to_pdb_string(self)
         else:
             raise ValueError("Unsupported file extension: " + ext)
-        save(string, path)
+        save_file(string, path)
 
 
     def atoms_in_sphere(self, location, radius, *args, **kwargs):

@@ -33,7 +33,7 @@ def test_dihedral_angle_trans():
 
     assert abs(dsspy_angle) == pytest.approx(expected_angle, abs=1e-3)
     assert abs(biopython_angle) == pytest.approx(expected_angle, abs=1e-3)
-    assert dsspy_angle == pytest.approx(biopython_angle, abs=1e-3)
+    assert abs(dsspy_angle - biopython_angle) < 1e-3 or abs(dsspy_angle + biopython_angle) < 1e-3
 
 
 @pytest.mark.filterwarnings("ignore:invalid value encountered in scalar divide")

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.transform import Rotation
 from .constants import PERIODIC_TABLE, ATOMIC_NUMBER, COVALENT_RADII, METALS
 
 class Atom:
@@ -13,7 +14,7 @@ class Atom:
      "_bvalue", "_anisotropy", "_het", "_bonded_atoms", "_is_hetatm"
     ]
 
-    def __init__(self, element, x, y, z, id, name, charge, bvalue, anisotropy, is_hetatm=False):
+    def __init__(self, element, x, y, z, id, name, charge, bvalue, anisotropy=None, is_hetatm=False):
         """Creates an Atom.
 
         :param str element: The atom's elemental symbol.
@@ -109,18 +110,15 @@ class Atom:
         point = np.array(point)
         Atom.translate_atoms(point * -1, *atoms)
 
-        axis = np.asarray(axis)
-        axis = axis / np.sqrt(np.dot(axis, axis))
-        a = np.cos(angle / 2)
-        b, c, d = -axis * np.sin(angle / 2)
-        aa, bb, cc, dd = a * a, b * b, c * c, d * d
-        bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-        matrix = np.array([
-         [aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-         [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-         [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]
-        ])
-        Atom.transform_atoms(matrix, *atoms, **kwargs)
+        rotation_vector = angle * (axis / np.linalg.norm(axis))
+        rotation = Rotation.from_rotvec(rotation_vector)
+
+        locations = [list(a) for a in atoms]
+        rotated_locations = rotation.apply(locations)
+
+        for atom, location in zip(atoms, rotated_locations):
+            atom._location = location
+
         Atom.translate_atoms(point, *atoms)
 
 

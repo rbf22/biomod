@@ -233,3 +233,50 @@ def get_sheet_label(sheet_number):
     if 27 <= sheet_number <= 52:
         return chr(ord('a') + sheet_number - 27)
     return '?'
+
+
+def find_downstream_atoms_in_residue(start_atom, previous_atom):
+    """
+    Finds all atoms downstream of a starting atom within the same residue.
+    """
+    downstream_atoms = set()
+    queue = [start_atom]
+    visited = {previous_atom}
+    start_residue = start_atom.het
+
+    while queue:
+        current_atom = queue.pop(0)
+        if current_atom in visited or current_atom.het is not start_residue:
+            continue
+        visited.add(current_atom)
+        downstream_atoms.add(current_atom)
+
+        for neighbor in current_atom.bonded_atoms:
+            if neighbor not in visited:
+                queue.append(neighbor)
+
+    return downstream_atoms
+
+
+def find_downstream_atoms_in_chain(start_atom, previous_atom):
+    """
+    Finds all atoms downstream of a starting atom in a molecule, avoiding a
+    specified previous atom. This is essentially a graph traversal (BFS or DFS)
+    starting from the start_atom.
+    """
+    downstream_atoms = set()
+    queue = [start_atom]
+    visited = {previous_atom}
+
+    while queue:
+        current_atom = queue.pop(0)
+        if current_atom in visited:
+            continue
+        visited.add(current_atom)
+        downstream_atoms.add(current_atom)
+
+        for neighbor in current_atom.bonded_atoms:
+            if neighbor not in visited:
+                queue.append(neighbor)
+
+    return downstream_atoms

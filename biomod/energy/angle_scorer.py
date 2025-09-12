@@ -118,7 +118,7 @@ class AngleScorerEnergy(torch.nn.Module):
         }
         for i in range(20):
             base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                     '..', 'parameters', 'weightsKDE')
+                                     '..', 'parameters', 'parameters', 'weightsKDE')
 
             bb_path = os.path.join(base_path, f'kdeBB_{i}.weights')
             if os.path.exists(bb_path):

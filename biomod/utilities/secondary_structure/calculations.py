@@ -43,29 +43,34 @@ def calculate_beta_sheets(residues: list[Residue]):
         """Checks if there is a continuous chain of residues between res1 and res2."""
         if res1 is None or res2 is None:
             return False
-        if res1.biopython_residue.get_parent() != res2.biopython_residue.get_parent():
+        if res1.chain != res2.chain:
             return False
-        if res1.number > res2.number:
+
+        res1_id = int(res1.id.split('.')[-1])
+        res2_id = int(res2.id.split('.')[-1])
+
+        if res1_id > res2_id:
             res1, res2 = res2, res1
+            res1_id, res2_id = res2_id, res1_id
 
         current = res1
-        while current and current.number < res2.number:
-            if current.next_residue is None or current.next_residue.number != current.number + 1:
+        while current and int(current.id.split('.')[-1]) < res2_id:
+            if current.next is None or int(current.next.id.split('.')[-1]) != int(current.id.split('.')[-1]) + 1:
                 return False
-            current = current.next_residue
-        return current is not None and current.number == res2.number
+            current = current.next
+        return current is not None and int(current.id.split('.')[-1]) == res2_id
 
     def _test_bridge(res1, res2):
         """
         Tests for a parallel or anti-parallel bridge between res1 and res2.
         This is a port of the `TestBridge` function from the C++ dssp implementation.
         """
-        a = res1.prev_residue
+        a = res1.previous
         b = res1
-        c = res1.next_residue
-        d = res2.prev_residue
+        c = res1.next
+        d = res2.previous
         e = res2
-        f = res2.next_residue
+        f = res2.next
 
         if not (a and c and _no_chain_break(a, c) and d and f and _no_chain_break(d, f)):
             return BridgeType.NONE
@@ -86,11 +91,14 @@ def calculate_beta_sheets(residues: list[Residue]):
         for j in range(i + 1, len(residues)):
             res2 = residues[j]
 
-            if res1.biopython_residue.get_parent() != res2.biopython_residue.get_parent():
+            if res1.chain != res2.chain:
                 continue
 
+            res1_id = int(res1.id.split('.')[-1])
+            res2_id = int(res2.id.split('.')[-1])
+
             # Residues in a bridge must be separated by at least 2
-            if abs(res1.number - res2.number) < 3:
+            if abs(res1_id - res2_id) < 3:
                 continue
 
             bridge_type = _test_bridge(res1, res2)
@@ -100,7 +108,7 @@ def calculate_beta_sheets(residues: list[Residue]):
     # print(f"Found {len(bridges)} initial bridges")
 
     # 2. Extend ladders (with bulge logic)
-    bridges.sort(key=lambda b: (b.i[0].biopython_residue.get_parent().id, b.i[0].number))
+    bridges.sort(key=lambda b: (b.i[0].chain.id, int(b.i[0].id.split('.')[-1])))
 
     i = 0
     while i < len(bridges):
@@ -115,19 +123,19 @@ def calculate_beta_sheets(residues: list[Residue]):
                _no_chain_break(b_i.i[0], b_j.i[-1]) and \
                _no_chain_break(b_i.j[0], b_j.j[-1]):
 
-                iei = b_i.i[-1].number
-                ibj = b_j.i[0].number
+                iei = int(b_i.i[-1].id.split('.')[-1])
+                ibj = int(b_j.i[0].id.split('.')[-1])
 
                 if b_i.type == BridgeType.PARALLEL:
-                    jei = b_i.j[-1].number
-                    jbj = b_j.j[0].number
+                    jei = int(b_i.j[-1].id.split('.')[-1])
+                    jbj = int(b_j.j[0].id.split('.')[-1])
                     if (jbj - jei < 6 and ibj - iei < 3) or (jbj - jei < 3):
                         b_i.i.extend(b_j.i)
                         b_i.j.extend(b_j.j)
                         merged = True
                 else:  # Antiparallel
-                    jbi = b_i.j[0].number
-                    jej = b_j.j[-1].number
+                    jbi = int(b_i.j[0].id.split('.')[-1])
+                    jej = int(b_j.j[-1].id.split('.')[-1])
                     if (jbi - jej < 6 and ibj - iei < 3) or (jbi - jej < 3):
                         b_i.i.extend(b_j.i)
                         # For antiparallel, the j-strand of the second bridge is added to the front
@@ -157,7 +165,7 @@ def calculate_beta_sheets(residues: list[Residue]):
                     b1_res = set(b1.i) | set(b1.j)
                     b2_res = set(b2.i) | set(b2.j)
                     is_linked = any(
-                        r1.next_residue in b2_res or r1.prev_residue in b2_res
+                        r1.next in b2_res or r1.previous in b2_res
                         for r1 in b1_res
                     )
                     if is_linked:
@@ -176,7 +184,7 @@ def calculate_beta_sheets(residues: list[Residue]):
         sheet_nr += 1
 
     # 4. Annotate residues with bridge and sheet info
-    res_map = {res.number: res for res in residues}
+    res_map = {res.id: res for res in residues}
     for bridge in bridges:
         ss = StructureType.BETA_BRIDGE if len(bridge.i) == 1 else StructureType.STRAND
 
@@ -196,19 +204,21 @@ def calculate_beta_sheets(residues: list[Residue]):
                 res_j.beta_partner[beta_j] = BridgePartner(res_i, bridge.ladder, False)
 
         # Annotate all residues in the strand range
-        i_start = bridge.i[0].number
-        i_end = bridge.i[-1].number
+        i_start = int(bridge.i[0].id.split('.')[-1])
+        i_end = int(bridge.i[-1].id.split('.')[-1])
+        chain_id = bridge.i[0].chain.id
         for res_num in range(i_start, i_end + 1):
-            res = res_map.get(res_num)
+            res = res_map.get(f"{chain_id}.{res_num}")
             if res:
                 if res.secondary_structure != StructureType.STRAND:
                     res.secondary_structure = ss
                 res.sheet = bridge.sheet
 
-        j_start = min(r.number for r in bridge.j)
-        j_end = max(r.number for r in bridge.j)
+        j_start = min(int(r.id.split('.')[-1]) for r in bridge.j)
+        j_end = max(int(r.id.split('.')[-1]) for r in bridge.j)
+        chain_id = bridge.j[0].chain.id
         for res_num in range(j_start, j_end + 1):
-            res = res_map.get(res_num)
+            res = res_map.get(f"{chain_id}.{res_num}")
             if res:
                 if res.secondary_structure != StructureType.STRAND:
                     res.secondary_structure = ss

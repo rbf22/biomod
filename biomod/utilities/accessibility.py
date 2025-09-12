@@ -18,15 +18,19 @@ from .geometry import _generate_fibonacci_sphere
 
 def _get_atom_spec(residue: Residue):
     """Generator for atom coordinates and their radii."""
-    yield residue.n_coord, RADIUS_N
-    yield residue.ca_coord, RADIUS_CA
-    yield residue.c_coord, RADIUS_C
-    yield residue.o_coord, RADIUS_O
-    for atom in residue.biopython_residue:
-        if atom.get_name() not in ["N", "CA", "C", "O", "H"]:
+    for atom in residue.atoms():
+        if atom.name == "N":
+            yield np.array(atom.location), RADIUS_N
+        elif atom.name == "CA":
+            yield np.array(atom.location), RADIUS_CA
+        elif atom.name == "C":
+            yield np.array(atom.location), RADIUS_C
+        elif atom.name == "O":
+            yield np.array(atom.location), RADIUS_O
+        elif atom.name != "H":
             # In the C++ code, all side chain atoms that are not H are treated
             # with a generic radius.
-            yield atom.get_coord(), RADIUS_SIDE_ATOM
+            yield np.array(atom.location), RADIUS_SIDE_ATOM
 
 
 def _atom_intersects_box(
@@ -186,7 +190,7 @@ def _calculate_atom_accessibility(
                 break
 
         if is_accessible:
-            surface += sphere.weight
+            surface += 1
 
     # Return surface area (weight already accounts for point density)
-    return surface * radius * radius
+    return surface * sphere.weight * radius * radius
