@@ -88,6 +88,13 @@ CODES = {
  "U": "U"
 }
 
+ONE_TO_THREE = {
+ 'V': 'VAL', 'I': 'ILE', 'L': 'LEU', 'E': 'GLU', 'Q': 'GLN',
+ 'D': 'ASP', 'N': 'ASN', 'H': 'HIS', 'W': 'TRP', 'F': 'PHE',
+ 'Y': 'TYR', 'R': 'ARG', 'K': 'LYS', 'S': 'SER', 'T': 'THR',
+ 'M': 'MET', 'A': 'ALA', 'G': 'GLY', 'P': 'PRO', 'C': 'CYS'
+}
+
 CHI_ANGLES = {
  "ARG": [
   ("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD"),

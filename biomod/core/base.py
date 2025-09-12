@@ -2,11 +2,10 @@
 
 import re
 import numpy as np
-import rmsd
 import math
 import warnings
-from scipy.spatial.distance import cdist
 from collections import Counter, defaultdict
+from ..utilities.geometry import kabsch_rmsd
 
 def get_object_from_filter(obj, components):
     """Gets the object whose attributes are actually being queried, which may be
@@ -390,7 +389,7 @@ class AtomStructure:
         c1, c2 = self.center_of_mass, structure.center_of_mass
         coords1 = [[x - c1[0], y - c1[1], z - c1[2]] for x, y, z in coords1]
         coords2 = [[x - c2[0], y - c2[1], z - c2[2]] for x, y, z in coords2]
-        return round(rmsd.kabsch_rmsd(coords1, coords2), 12)
+        return round(kabsch_rmsd(np.array(coords1), np.array(coords2)), 12)
 
 
     def create_grid(self, size=1, margin=0):
@@ -487,7 +486,7 @@ class AtomStructure:
             atoms = self.atoms(*args, **kwargs)
         X = np.tile(location, [len(atoms), 1])
         Y = np.array([a.location for a in atoms])
-        distances = cdist(X, Y)[0]
+        distances = np.linalg.norm(Y - X, axis=1)
         return {a for index, a in enumerate(atoms) if distances[index] <= radius}
 
 

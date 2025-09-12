@@ -3,8 +3,4 @@ torch
 numpy
 hypothesis
 networkx
-biopython
-scipy
 msgpack
-valerius
-rmsd
