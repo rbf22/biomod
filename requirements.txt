@@ -1,8 +1,0 @@
-pytest
-torch
-numpy
-hypothesis
-networkx
-msgpack
-scipy
-pytest-cov

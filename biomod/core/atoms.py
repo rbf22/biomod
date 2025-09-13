@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.spatial.transform import Rotation
+from .math import rotation_matrix
 from .constants import PERIODIC_TABLE, ATOMIC_NUMBER, COVALENT_RADII, METALS
 
 class Atom:
@@ -110,11 +110,10 @@ class Atom:
         point = np.array(point)
         Atom.translate_atoms(point * -1, *atoms)
 
-        rotation_vector = angle * (axis / np.linalg.norm(axis))
-        rotation = Rotation.from_rotvec(rotation_vector)
+        rot_mat = rotation_matrix(axis, angle)
 
-        locations = [list(a) for a in atoms]
-        rotated_locations = rotation.apply(locations)
+        locations = np.array([list(a) for a in atoms])
+        rotated_locations = np.dot(locations, rot_mat.T)
 
         for atom, location in zip(atoms, rotated_locations):
             atom._location = location
