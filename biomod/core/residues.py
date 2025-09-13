@@ -29,6 +29,11 @@ class Het(AtomStructure):
 
 
     @property
+    def number(self):
+        return int(self._id.split('.')[-1])
+
+
+    @property
     def full_name(self):
         """Returns the residue's full name, based on its three letter name - or
         just the three letter name if it doesn't match anything. Or you can just
@@ -54,6 +59,11 @@ class Het(AtomStructure):
         :rtype: ``Chain``"""
 
         return self._chain
+
+
+    @chain.setter
+    def chain(self, value):
+        self._chain = value
 
 
     def atoms(self):

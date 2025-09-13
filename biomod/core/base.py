@@ -5,7 +5,7 @@ import numpy as np
 import math
 import warnings
 from collections import Counter, defaultdict
-from ..utilities.geometry import kabsch_rmsd
+from .math import kabsch_rmsd
 
 def get_object_from_filter(obj, components):
     """Gets the object whose attributes are actually being queried, which may be

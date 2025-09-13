@@ -14,6 +14,10 @@ from .data_structures import (
 
 
 def calculate_beta_sheets(residues: list[Residue]):
+    for res in residues:
+        res.sheet = 0
+        res.beta_partner = [BridgePartner(None, 0, False), BridgePartner(None, 0, False)]
+        res.secondary_structure = StructureType.LOOP
     """Calculates and assigns beta sheet information based on H-bond patterns.
 
     This function identifies beta bridges, extends them into ladders, and groups
