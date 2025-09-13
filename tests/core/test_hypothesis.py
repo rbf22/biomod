@@ -33,7 +33,6 @@ NODE_DATA = st.fixed_dictionaries({
 }).map(lambda d: {k: v for k, v in d.items() if v is not None})
 FRAGMENTS = st.sampled_from('C O N P S c1ccccc1 C(=O)[O-] C(=O)O *'.split())
 
-@pytest.mark.skip(reason="Temporarily skipping to focus on other tests")
 @settings(max_examples=500, stateful_step_count=50, deadline=None)
 class SMILESTest(RuleBasedStateMachine):
     @initialize(fragment=FRAGMENTS)
@@ -176,4 +175,4 @@ class SMILESTest(RuleBasedStateMachine):
                           excluded_node_attrs=['_pos', '_atom_str'],
                           excluded_edge_attrs=['_pos', '_bond_str'])
 
-# Tester = SMILESTest.TestCase
+TestSMILES = SMILESTest.TestCase

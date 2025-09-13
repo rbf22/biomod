@@ -328,11 +328,10 @@ class Residue(Het, metaclass=StructureClass):
             delta = math.radians(angle - current_angle)
             ca = self.atom(name="CA")
             c = self.atom(name="C")
-            if ca and c:
+            if ca and c and self.next:
                 axis = np.array(c.location) - np.array(ca.location)
                 point = ca.location
-                atoms_to_rotate = find_downstream_atoms_in_chain(c, ca)
-                atoms_to_rotate = {a for a in atoms_to_rotate if a is not c}
+                atoms_to_rotate = self.next.atoms()
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
 
@@ -342,17 +341,17 @@ class Residue(Het, metaclass=StructureClass):
 
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms_in_chain
+        from ..utilities.utils import find_downstream_atoms_in_residue
         current_angle = self.omega
         if current_angle is not None:
             delta = math.radians(angle - current_angle)
             c = self.atom(name="C")
             n_next = self.next.atom(name="N")
-            if c and n_next:
+            ca_next = self.next.atom(name="CA")
+            if c and n_next and ca_next:
                 axis = np.array(n_next.location) - np.array(c.location)
                 point = c.location
-                atoms_to_rotate = find_downstream_atoms_in_chain(n_next, c)
-                atoms_to_rotate = {a for a in atoms_to_rotate if a is not n_next}
+                atoms_to_rotate = find_downstream_atoms_in_residue(ca_next, n_next)
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
 
@@ -369,13 +368,13 @@ class Residue(Het, metaclass=StructureClass):
             delta = math.radians(angle - current_angle)
 
             atom_names = CHI_ANGLES[self.name][n - 1]
-            b, c = self.atom(name=atom_names[1]), self.atom(name=atom_names[2])
+            atom2 = self.atom(name=atom_names[1])
+            atom3 = self.atom(name=atom_names[2])
 
-            if b and c:
-                axis = np.array(c.location) - np.array(b.location)
-                point = b.location
-                atoms_to_rotate = find_downstream_atoms_in_residue(c, b)
-                atoms_to_rotate = {a for a in atoms_to_rotate if a is not c}
+            if atom2 and atom3:
+                axis = np.array(atom3.location) - np.array(atom2.location)
+                point = atom2.location
+                atoms_to_rotate = find_downstream_atoms_in_residue(atom3, atom2)
                 Atom.rotate_atoms(delta, axis, *atoms_to_rotate, point=point)
 
 

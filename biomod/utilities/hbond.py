@@ -96,19 +96,27 @@ def assign_hydrogen_to_residues(residues: list[Residue]):
             continue
         residue.h_coord = np.array(n_atom.location, dtype=float)
         # For non-proline residues with a previous residue
-        if residue.name != "PRO" and i > 0:
-            prev_residue = residues[i - 1]
-            prev_c = prev_residue.atom(name="C")
-            prev_o = prev_residue.atom(name="O")
-            if prev_c is None or prev_o is None:
-                continue
-            # Calculate CO vector and normalize it
-            co_vector = np.array(prev_c.location) - np.array(prev_o.location)
-            co_distance = np.linalg.norm(co_vector)
-            if co_distance > 0:
-                co_unit = co_vector / co_distance
-                # Place hydrogen along the CO vector direction from nitrogen
-                residue.h_coord += co_unit
+        if residue.name != "PRO":
+            if i > 0:
+                prev_residue = residues[i - 1]
+                prev_c = prev_residue.atom(name="C")
+                prev_o = prev_residue.atom(name="O")
+                if prev_c is None or prev_o is None:
+                    continue
+                # Calculate CO vector and normalize it
+                co_vector = np.array(prev_c.location) - np.array(prev_o.location)
+                co_distance = np.linalg.norm(co_vector)
+                if co_distance > 0:
+                    co_unit = co_vector / co_distance
+                    # Place hydrogen along the CO vector direction from nitrogen
+                    residue.h_coord += co_unit
+            else:  # First residue
+                ca_atom = residue.atom(name="CA")
+                if ca_atom is not None:
+                    n_ca_vector = np.array(ca_atom.location) - np.array(n_atom.location)
+                    norm = np.linalg.norm(n_ca_vector)
+                    if norm > 0:
+                        residue.h_coord -= n_ca_vector / norm
 
 
 def calculate_h_bonds(residues: list[Residue]) -> None:

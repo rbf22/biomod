@@ -8,7 +8,7 @@ PROJECT_ROOT = TEST_FILE_PATH.parent.parent.parent
 GOLDEN_OUTPUTS_DIR = PROJECT_ROOT / "tests/reference_data"
 
 
-@pytest.mark.skip(reason="The python script biomod/utilities/rebuild/main.py is broken")
+@pytest.mark.skip(reason="The python script biomod/utilities/rebuild/main.py is broken and produces different output from the golden file.")
 def test_multichain_output(tmp_path):
     # Setup paths for the multichain test
     input_pdb = PROJECT_ROOT / "tests/reference_data/7laf_ca.pdb"
