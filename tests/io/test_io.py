@@ -31,7 +31,6 @@ def test_read_cif():
     assert isinstance(f, File)
     assert f.model is not None
 
-@pytest.mark.skip(reason="The PDB parser in biomod/io/pdb.py is not robust enough to handle incomplete residues.")
 def test_read_pdb_incomplete_residue(tmp_path):
     """
     Tests that residues with missing backbone atoms are skipped.
@@ -48,7 +47,6 @@ ATOM      3  C   ALA A   1       2.000   2.000   1.000  1.00  0.00           C
     f = io.open(temp_pdb)
     assert len(f.model.residues()) == 1
 
-@pytest.mark.skip(reason="The PDB parser in biomod/io/pdb.py does not handle TER records correctly.")
 def test_read_pdb_chain_gap(tmp_path):
     """
     Tests that a gap in the chain is correctly identified.
