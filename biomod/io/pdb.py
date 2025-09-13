@@ -41,6 +41,8 @@ def pdb_string_to_pdb_dict(filestring):
                 pdb_dict["MODEL"][-1].append(line)
         else:
             update_dict(pdb_dict, head, line)
+    if pdb_dict.get("MODRES"):
+        pdb_dict["MODRES"] = [line.split() for line in pdb_dict["MODRES"]]
     if "MODEL" in pdb_dict and not pdb_dict["MODEL"][-1]:
         pdb_dict["MODEL"].pop()
     return pdb_dict
@@ -190,28 +192,35 @@ def add_annotation_to_polymers(model, pdb_dict):
 
 def update_models_list(pdb_dict, data_dict):
     """Creates model dictionaries in a data dictionary.
-
     :param dict pdb_dict: The .pdb dictionary to read.
     :param dict data_dict: The data dictionary to update."""
 
     sequences = make_sequences(pdb_dict)
     secondary_structure = make_secondary_structure(pdb_dict)
     full_names = get_full_names(pdb_dict)
+    modres = set()
+    if "MODRES" in pdb_dict:
+        for line in pdb_dict["MODRES"]:
+            modres.add(f"{line[3]}.{line[4].strip()}")
+
     for model_lines in pdb_dict["MODEL"]:
         aniso = make_aniso(model_lines)
-        last_ter = get_last_ter_line(model_lines)
         model = {"polymer": {}, "non-polymer": {}, "water": {}}
-        for index, line in enumerate(model_lines):
-            if line[:6] in ["ATOM  ", "HETATM"]:
-                chain_id = line[21] if index < last_ter else id_from_line(line)
+        for line in model_lines:
+            if line.startswith("ATOM"):
+                chain_id = line[21]
                 res_id = id_from_line(line)
-                if index < last_ter:
+                add_atom_to_polymer(line, model, chain_id, res_id, aniso, full_names)
+            elif line.startswith("HETATM"):
+                res_id = id_from_line(line)
+                if res_id in modres:
+                    chain_id = line[21]
                     add_atom_to_polymer(line, model, chain_id, res_id, aniso, full_names)
                 else:
                     add_atom_to_non_polymer(line, model, res_id, aniso, full_names)
-        
-            for chain_id, chain_obj in model["polymer"].items():
-                chain_obj["sequence"] = sequences.get(chain_id, "")
+
+        for chain_id, chain_obj in model["polymer"].items():
+            chain_obj["sequence"] = sequences.get(chain_id, "")
         add_secondary_structure_to_polymers(model, secondary_structure)
         add_annotation_to_polymers(model, pdb_dict)
         data_dict["models"].append(model)
