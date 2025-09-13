@@ -4,3 +4,6 @@ numpy
 hypothesis
 networkx
 msgpack
+scipy
+rmsd
+pytest-cov
