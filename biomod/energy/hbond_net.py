@@ -563,8 +563,8 @@ class HBondNet(torch.nn.Module):
         else:
             final_hbond_score = []
             final_indices = []
-            return (
-             final_hbond_score, final_indices, full_mask)
+        return (
+         final_hbond_score, final_indices, full_mask)
 
     def build_angle_boundariesNew(self, masked_atom_description, is_backbone_mask):
         dev = is_backbone_mask.device

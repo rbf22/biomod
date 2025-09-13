@@ -96,7 +96,6 @@ def parse_reference_dssp(filepath):
 
     return hbonds
 
-@pytest.mark.skip(reason="Temporarily skipping to focus on other tests")
 def test_calculate_h_bonds_comparative():
     """
     Tests the calculate_h_bonds function by comparing its output to a
@@ -104,12 +103,12 @@ def test_calculate_h_bonds_comparative():
     """
     # 1. Run dsspy's H-bond calculation
     f = io.open('tests/reference_data/1cbs.cif.gz')
-    residues = sorted(list(f.model.residues()), key=lambda r: r.id)
+    residues = sorted(list(f.model.residues()), key=lambda r: int(r.id.split('.')[-1]))
     calculate_h_bonds(residues)
 
     # 2. Parse the reference DSSP file
     reference_hbonds = parse_reference_dssp(
-        'test/reference_data/1cbs-dssp.cif')
+        'tests/reference_data/1cbs-dssp.cif')
 
     # 3. Compare the results
     assert len(residues) == len(reference_hbonds)

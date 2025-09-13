@@ -12,7 +12,7 @@ from biomod.io import vitra_utils as utils
 from biomod.energy.force_field import ForceField
 
 
-@pytest.mark.skip(reason="Missing test data")
+@pytest.mark.skip(reason="This test fails with a RuntimeError due to a tensor shape mismatch in the SideChainEntropyEnergy module.")
 def test():
     class SimpleNN(torch.nn.Module):  # very simple recurrent neural net
 

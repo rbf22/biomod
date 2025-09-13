@@ -16,7 +16,7 @@ import numpy as np
 # from .energy import calc_ca_energy
 # from .data import AA_NAMES, SHORT_AA_NAMES, AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
 # from .geometry import calc_distance, calc_r14, superimpose, cross, norm
-# from .rotamer_data import ROT_STAT_IDX, ROT_STAT_COORDS
+from .rotamer_data import ROT_STAT_IDX, ROT_STAT_COORDS
 
 # --- Legacy Data Structures (from pdb_datastructures.py) ---
 
@@ -90,7 +90,6 @@ def rebuild_sidechains(chain, c_alpha, rbins):
     """
     Rebuilds the side chains of the protein.
     """
-    print("Rebuilding side chains...")
     chain_length = len(chain.residues)
     res_list = []
     for res in chain.residues:
@@ -132,6 +131,9 @@ def rebuild_sidechains(chain, c_alpha, rbins):
 
         sorted_rotamers.sort()
 
+        if not sorted_rotamers:
+            continue
+
         bestpos = sorted_rotamers[0][1]
         pos = ROT_STAT_IDX[bestpos][5]
         nsc = NHEAVY[res.type] + 1
@@ -154,7 +156,6 @@ def rebuild_backbone(chain):
     """
     Rebuilds the protein backbone.
     """
-    print("Rebuilding backbone...")
 
     # Initialize data structures
     chain_length = len(chain.residues)
@@ -358,10 +359,8 @@ def add_hydrogens(chain: Molecule):
     """
     Adds hydrogen atoms to the protein chain.
     """
-    from .hydrogens import get_hydrogen_positions
+    from ..hydrogens import get_hydrogen_positions
     # from .pdb_datastructures import Atom # This is now defined in this file
-
-    print("Adding hydrogens...")
 
     prev_c_coord = None
     for res in chain.residues:
@@ -382,3 +381,70 @@ def add_hydrogens(chain: Molecule):
         # Store the C-atom of the current residue for the next iteration
         if 'C' in heavy_atoms:
             prev_c_coord = heavy_atoms['C']
+
+def molecule_to_pdb_string(molecule: Molecule) -> str:
+    """
+    Converts a Molecule object to a PDB-formatted string.
+    """
+    lines = ["REMARK 999 REBUILT BY PULCHRA V.3.04"]
+    atom_num = 1
+    for res in molecule.residues:
+        for atom in res.atoms:
+            atom_name = atom.name
+            if len(atom_name) < 4:
+                atom_name = " " + atom_name
+            line = (f"ATOM  {atom_num:5d} {atom_name:<4s} {res.name:3s} {res.chain:1s}{res.num:4d}    "
+                    f"{atom.x:8.3f}{atom.y:8.3f}{atom.z:8.3f}{1.0:6.2f}{0.0:6.2f}          "
+                    f"{atom_name.strip()[0]:>2s}  ")
+            lines.append(line)
+            atom_num += 1
+    if molecule.residues:
+        last_res = molecule.residues[-1]
+        lines.append(f"TER   {atom_num:5d}      {last_res.name:3s} {last_res.chain:1s}{last_res.num:4d}")
+    lines.append("END")
+    return "\n".join(lines)
+
+if __name__ == "__main__":
+    import argparse
+    from .data import AA_NAMES, SHORT_AA_NAMES, AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
+    from ..geometry import calc_distance, calc_r14, superimpose, cross, norm
+
+    parser = argparse.ArgumentParser(description="Rebuild protein structure from C-alpha trace.")
+    parser.add_argument("input_pdb", help="Input PDB file with C-alpha trace.")
+    parser.add_argument("--add-hydrogens", action="store_true", help="Add hydrogen atoms.")
+    args = parser.parse_args()
+
+    # This is a more complete PDB parser
+    chain = Molecule("protein")
+    with open(args.input_pdb) as f:
+        residues_dict = {}
+        for line in f:
+            if line.startswith("ATOM"):
+                res_name = line[17:20].strip()
+                res_num = int(line[22:26])
+                chain_id = line[21]
+                atom_name = line[12:16].strip()
+                x = float(line[30:38])
+                y = float(line[38:46])
+                z = float(line[46:54])
+
+                res_key = (chain_id, res_num)
+                if res_key not in residues_dict:
+                    res = Residue(res_num, res_num, 0, AA_NUMS.get(res_name, 20),
+                                  res_num, True, res_name, chain_id)
+                    residues_dict[res_key] = res
+                    chain.residues.append(res)
+                else:
+                    res = residues_dict[res_key]
+
+                res.add_or_replace_atom(atom_name, x, y, z, 1)
+    chain.nres = len(chain.residues)
+
+
+    c_alpha, rbins = rebuild_backbone(chain)
+    rebuild_sidechains(chain, c_alpha, rbins)
+
+    if args.add_hydrogens:
+        add_hydrogens(chain)
+
+    print(molecule_to_pdb_string(chain))

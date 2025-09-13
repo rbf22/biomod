@@ -54,7 +54,7 @@ def test_format_header_empty():
     assert "SOURCE    MOL_ID: 1" in header_str
 
 
-@pytest.mark.skip(reason="This test hangs and causes a timeout.")
+@pytest.mark.skip(reason="This test hangs and causes a timeout, even with small input files. The root cause is unknown.")
 def test_format_dssp_line_with_sheets():
     """
     Tests that the sheet and bridge labels are correctly formatted in the output line.

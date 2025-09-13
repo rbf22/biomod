@@ -82,7 +82,6 @@ class MmcifFileSavingTests(SavingTest):
 
 
 
-@pytest.mark.skip(reason="Temporarily skipping to focus on other tests")
 class MmtfFileSavingTests(SavingTest):
 
     def test_can_save_1lol(self):
@@ -124,7 +123,6 @@ class MmtfFileSavingTests(SavingTest):
 
 
 
-@pytest.mark.skip(reason="Temporarily skipping to focus on other tests")
 class PdbFileSavingTests(SavingTest):
 
     def test_can_save_1lol(self):

@@ -38,5 +38,10 @@ def fetch(*args, **kwargs):
 def fetch_over_ssh(*args, **kwargs):
     pass
 
-def save(*args, **kwargs):
-    pass
+def save(string, path):
+    if isinstance(string, bytes):
+        with open(path, "wb") as f:
+            f.write(string)
+    else:
+        with open(path, "w") as f:
+            f.write(string)
