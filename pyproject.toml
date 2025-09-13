@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "biomod"
+version = "0.1.0"
+description = "A comprehensive, extensible and modular package for molecular modelling"
+authors = ["Protein-Design-By-AI <info@protein-design.com>"]
+readme = "README.md"
+packages = [{include = "biomod"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+torch = "*"
+numpy = "*"
+networkx = "*"
+msgpack = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+hypothesis = "*"
+pytest-cov = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
