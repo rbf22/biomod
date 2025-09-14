@@ -1,5 +1,6 @@
 from datetime import date
 import math
+import pytest
 from biomod.core.atoms import Atom
 from biomod.core.residues import Residue, Ligand
 from biomod.core.base import Chain, Model
