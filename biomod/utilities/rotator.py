@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import torch
 
-from vitra.sources import hashings
-from vitra.sources.globalVariables import PADDING_INDEX
+from biomod.energy import hashings
+from biomod.config import PADDING_INDEX
 
 
 class RotateStruct:
@@ -658,7 +658,7 @@ class RotateStruct:
                         masked_translation).unsqueeze(-1)).squeeze(-1))
 
                 rotate_coord_mask = padding_mask.clone()
-                rotate_coord_mask[rotate_coord_mask] = todoMask
+                rotate_coord_mask[rotate_coord_mask.clone()] = todoMask
 
                 rotated_coords = rotated_coords.masked_scatter(rotate_coord_mask.unsqueeze(-1).repeat(1, 3), fat)
 

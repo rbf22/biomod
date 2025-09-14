@@ -5,8 +5,8 @@ import math
 import time
 import torch
 
-from vitra.mutate import rotator
-from vitra.sources import hashings
+from biomod.utilities import rotator
+from biomod.energy import hashings
 
 letters = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K', 'ASN': 'N', 'PRO': 'P', 'THR': 'T', 'PHE': 'F',
            'ALA': 'A', 'HIS': 'H', 'GLY': 'G', 'ILE': 'I', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 'VAL': 'V', 'GLU': 'E',
