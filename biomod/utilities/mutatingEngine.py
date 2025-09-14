@@ -1,6 +1,6 @@
 import torch
-from vitra.sources import fakeAtomsGeneration
-from vitra.sources.globalVariables import PADDING_INDEX
+from biomod.energy import fake_atoms as fakeAtomsGeneration
+from biomod.config import PADDING_INDEX
 
 atomsOfEachresi = {
     'LYS': ['C', 'N', 'O', 'CA', 'CB', 'CG', 'CD', 'CE', 'NZ'],
