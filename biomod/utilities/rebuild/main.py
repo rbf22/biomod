@@ -13,7 +13,7 @@ import numpy as np
 
 # NOTE: The imports below will need to be fixed after the refactoring.
 # from .pdb_datastructures import Molecule
-# from .energy import calc_ca_energy
+from .energy import calc_ca_energy
 # from .data import AA_NAMES, SHORT_AA_NAMES, AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
 # from .geometry import calc_distance, calc_r14, superimpose, cross, norm
 from .rotamer_data import ROT_STAT_IDX, ROT_STAT_COORDS
@@ -330,7 +330,7 @@ def ca_optimize(chain, ca_trajectory, ini_file, cispro, ca_random, ca_start_dist
         for i in range(chain_length):
             gradient[i][0] = gradient[i][1] = gradient[i][2] = 0.0
 
-        # e_pot = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, 0.0, energies, True, ca_start_dist)
+        calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, 0.0, energies, True, ca_start_dist)
 
         # Line search
         # alpha1 = -1.0

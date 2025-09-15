@@ -18,6 +18,7 @@ Contains helper functions for parsing and writing SMILES strings, as well as
 some convenience functions for adding hydrogens, and detecting aromaticity.
 """
 
+import enum
 import logging
 import re
 import operator
@@ -1024,78 +1025,6 @@ def _interpret_cis_trans_tokens(molecule, ez_pairs):
         molecule.nodes[ligand_second]['ez_isomer'].append(
             (ligand_second, anchor_second, anchor_first, ligand_first, ez_isomer)
         )
-
-import enum  # noqa: E402
-
-@enum.unique
-class TokenType(enum.Enum):
-    """Possible SMILES token types"""
-    ATOM = 1
-    BOND_TYPE = 2
-    BRANCH_START = 3
-    BRANCH_END = 4
-    RING_NUM = 5
-    EZSTEREO = 6
-    CHIRAL = 7
-
-
-def _tokenize(smiles):
-    """
-    Iterates over a SMILES string, yielding tokens.
-
-    Parameters
-    ----------
-    smiles : iterable
-        The SMILES string to iterate over
-
-    Yields
-    ------
-    tuple(TokenType, int, str)
-        A tuple describing the type of token, its position, and the associated
-        data.
-    """
-    organic_subset = 'B C N O P S F Cl Br I * b c n o s p'.split()
-    smiles = iter(smiles)
-    token = ''
-    idx = -1
-    peek = None
-    while True:
-        idx += 1
-        char = peek if peek else next(smiles, '')
-        peek = None
-        if not char:
-            break
-        if char == '[':
-            token = char
-            for char in smiles:  # pragma: no branch
-                token += char
-                if char == ']':
-                    break
-            yield TokenType.ATOM, idx, token
-        elif char in organic_subset:
-            peek = next(smiles, '')
-            if char + peek in organic_subset:
-                yield TokenType.ATOM, idx, char + peek
-                peek = None
-            else:
-                yield TokenType.ATOM, idx, char
-        elif char in '-=#$:.':
-            yield TokenType.BOND_TYPE, idx, char
-        elif char == '(':
-            yield TokenType.BRANCH_START, idx, '('
-        elif char == ')':
-            yield TokenType.BRANCH_END, idx, ')'
-        elif char == '%':
-            # If smiles is too short this will raise a ValueError, which is
-            # (slightly) prettier than a StopIteration.
-            yield TokenType.RING_NUM, idx, int(next(smiles, '') + next(smiles, ''))
-        elif char in '/\\':
-            yield TokenType.EZSTEREO, idx, char
-        elif char.isdigit():  # pragma: no branch
-            yield TokenType.RING_NUM, idx, int(char)
-
-
-import enum
 
 @enum.unique
 class TokenType(enum.Enum):

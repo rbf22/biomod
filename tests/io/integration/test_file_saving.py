@@ -39,8 +39,8 @@ def check_file_saving(filename):
     # Compare ligands
     assert len(f.model.ligands()) == len(f2.model.ligands())
     for lig1, lig2 in zip(
-        sorted(f.model.ligands(), key=lambda l: l.id),
-        sorted(f2.model.ligands(), key=lambda l: l.id),
+        sorted(f.model.ligands(), key=lambda ligand: ligand.id),
+        sorted(f2.model.ligands(), key=lambda ligand: ligand.id),
     ):
         assert lig1.id == lig2.id
         assert lig1.name == lig2.name

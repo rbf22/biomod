@@ -27,14 +27,16 @@ def build_coords_from_ic(atom_name, ic_data, atom_coords):
     norm_a = np.linalg.norm(a)
     norm_b = np.linalg.norm(b)
 
-    if norm_a == 0 or norm_b == 0: return None
+    if norm_a == 0 or norm_b == 0:
+        return None
 
     a /= norm_a
     b /= norm_b
 
     n = np.cross(a,b)
     norm_n = np.linalg.norm(n)
-    if norm_n == 0: return None
+    if norm_n == 0:
+        return None
     n /= norm_n
 
     c = np.cross(n,b)
@@ -65,7 +67,8 @@ def main():
             parts = line.split()
             if len(parts) > 1:
                 res_name = parts[1]
-                if len(res_name) > 3: continue
+                if len(res_name) > 3:
+                    continue
                 current_res = res_name
                 residues[current_res] = {'atoms': [], 'ics': {}}
         elif current_res and line.startswith('ATOM'):
@@ -101,10 +104,12 @@ def main():
         all_atoms = {atom['name'] for atom in data['atoms']}
 
         for atom_name, ic_data in data['ics'].items():
-            if atom_name not in all_atoms: continue
+            if atom_name not in all_atoms:
+                continue
             for dep in ic_data['deps']:
                 if dep in all_atoms:
-                    if dep not in adj: adj[dep] = []
+                    if dep not in adj:
+                        adj[dep] = []
                     adj[dep].append(atom_name)
                     in_degree[atom_name] += 1
 
@@ -114,7 +119,8 @@ def main():
         while q:
             u = q.popleft()
             build_order.append(u)
-            if u not in adj: continue
+            if u not in adj:
+                continue
             for v in adj[u]:
                 in_degree[v] -= 1
                 if in_degree[v] == 0:

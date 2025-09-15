@@ -24,14 +24,16 @@ def build_coords_from_ic(atom_name, ic_data, atom_coords):
     norm_a = np.linalg.norm(a)
     norm_b = np.linalg.norm(b)
 
-    if norm_a == 0 or norm_b == 0: return None
+    if norm_a == 0 or norm_b == 0:
+        return None
 
     a /= norm_a
     b /= norm_b
 
     n = np.cross(a,b)
     norm_n = np.linalg.norm(n)
-    if norm_n == 0: return None
+    if norm_n == 0:
+        return None
     n /= norm_n
 
     c = np.cross(n,b)

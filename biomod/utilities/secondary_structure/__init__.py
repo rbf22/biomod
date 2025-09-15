@@ -1,1 +1,6 @@
 from .calculations import calculate_beta_sheets, calculate_pp_helices
+
+__all__ = [
+    'calculate_beta_sheets',
+    'calculate_pp_helices',
+]

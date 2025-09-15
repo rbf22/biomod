@@ -29,7 +29,6 @@ def main():
     output_dir = Path('pulchra/parameters')
 
     residues = {}
-    current_model = 1
 
     with open(pdb_file, 'r') as f:
         for line in f:
