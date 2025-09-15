@@ -781,10 +781,3 @@ class TestFileReading:
             assert len(f.model.chains()) == (3 if e == "pdb" else 18)
             assert len(f.model.ligands()) == (62 if e == "pdb" else 32)
     
-
-    @pytest.mark.skip(reason="Could not find a PDB file with secondary structure that biomod can parse.")
-    def test_3jbp(self):
-        # Multi character secondary structure
-        for e in ["cif"]:
-            f = io.open("tests/io/integration/files/3jbp." + e)
-            assert len(f.model.chain("Aa").helices) == 4

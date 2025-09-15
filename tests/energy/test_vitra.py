@@ -11,8 +11,6 @@ from biomod.energy import vitra_tensors as data_structures
 from biomod.io import vitra_utils as utils
 from biomod.energy.force_field import ForceField
 
-
-@pytest.mark.skip(reason="This test fails with a RuntimeError due to a tensor shape mismatch in the SideChainEntropyEnergy module.")
 def test():
     class SimpleNN(torch.nn.Module):  # very simple recurrent neural net
 
@@ -37,7 +35,7 @@ def test():
             out = self.feedForwardStep(output_rnn)
             return out.squeeze(-1)
 
-    pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vitra", "exampleStructures")
+    pdb_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "reference_data")
 
     device = "cuda"
     device = "cpu"
@@ -57,7 +55,7 @@ def test():
     container = ForceField(device=device)
 
     # Load the model with map_location=torch.device('cpu')
-    container.load_state_dict(torch.load("vitra/parameters/final_model.weights", map_location=torch.device(device)), strict=False)
+    container.load_state_dict(torch.load("biomod/parameters/final_model.weights", map_location=torch.device(device)), strict=False)
 
     energies = container(coordinates.to(device), info_tensors).data
 

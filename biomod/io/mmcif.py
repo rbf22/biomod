@@ -8,6 +8,7 @@ from ..core.constants import CODES, ONE_TO_THREE
 from ..core.base import Chain
 from ..core.residues import Residue, Ligand
 
+
 def mmcif_string_to_mmcif_dict(filestring):
     """Takes a .cif filestring and turns into a ``dict`` which represents its
     table structure. Only lines which aren't empty and which don't begin with
@@ -47,11 +48,12 @@ def consolidate_strings(lines):
         line = lines.popleft()
         if line.startswith(";"):
             string = [line[1:].strip()]
-            while not lines[0].startswith(";"):
+            while lines and not lines[0].startswith(";"):
                 string.append(lines.popleft())
-            lines.popleft()
-            new_lines[-1] += " \"{}\"".format(
-             " ".join(string).replace('"', "\x1a").replace("'", "\x1b")
+            if lines:
+                lines.popleft()
+            new_lines[-1] += ' "{}"'.format(
+                " ".join(string).replace('"', "\x1a").replace("'", "\x1b")
             )
         else:
             new_lines.append(line)
@@ -128,15 +130,15 @@ def loop_block_to_list(block):
     names = [line.split(".")[1].rstrip() for line in block["lines"][1:body_start]]
     lines = [split_values(line) for line in block["lines"][body_start:]]
     table_rows = []
-    for n in range(len(lines) - 1):
-        while n < len(lines) - 1 and\
-         len(lines[n]) + len(lines[n + 1]) <= len(names):
+    n = 0
+    while n < len(lines) - 1:
+        if len(lines[n]) + len(lines[n + 1]) <= len(names):
             lines[n] += lines[n + 1]
             lines.pop(n + 1)
+        else:
+            n += 1
     for line in lines:
-        table_rows.append({
-         name: value for name, value in zip(names, line)
-        })
+        table_rows.append({name: value for name, value in zip(names, line)})
     return table_rows
 
 
@@ -151,7 +153,7 @@ def split_values(line):
     :param str line: the .cif line to split.
     :rtype: ``list``"""
 
-    if not re.search("[\'\"]", line):
+    if not re.search("['\"]", line):
         return line.split()
     chars = deque(line.strip())
     values, value, in_string = [], [], False
@@ -180,10 +182,11 @@ def strip_quotes(mmcif_dict):
     for name, table in mmcif_dict.items():
         for row in table:
             for k, value in row.items():
-                for char in "'\"":
-                    if value[0] == char and value[-1] == char:
-                        row[k] = value[1:-1]
-                    row[k] = row[k].replace("\x1a", '"').replace("\x1b", "'")
+                if isinstance(value, str):
+                    for char in "'\"":
+                        if value and value[0] == char and value[-1] == char:
+                            row[k] = value[1:-1]
+                        row[k] = row[k].replace("\x1a", '"').replace("\x1b", "'")
 
 
 def mmcif_dict_to_data_dict(mmcif_dict):
@@ -194,14 +197,23 @@ def mmcif_dict_to_data_dict(mmcif_dict):
     :rtype: ``dict``"""
 
     data_dict = {
-     "description": {
-      "code": None, "title": None, "deposition_date": None,
-      "classification": None, "keywords": [], "authors": []
-     }, "experiment": {
-      "technique": None, "source_organism": None, "expression_system": None,
-      "missing_residues": []
-     }, "quality": {"resolution": None, "rvalue": None, "rfree": None},
-     "geometry": {"assemblies": [], "crystallography": {}}, "models": []
+        "description": {
+            "code": None,
+            "title": None,
+            "deposition_date": None,
+            "classification": None,
+            "keywords": [],
+            "authors": [],
+        },
+        "experiment": {
+            "technique": None,
+            "source_organism": None,
+            "expression_system": None,
+            "missing_residues": [],
+        },
+        "quality": {"resolution": None, "rvalue": None, "rfree": None},
+        "geometry": {"assemblies": [], "crystallography": {}},
+        "models": [],
     }
     update_description_dict(mmcif_dict, data_dict)
     update_experiment_dict(mmcif_dict, data_dict)
@@ -218,20 +230,45 @@ def update_description_dict(mmcif_dict, data_dict):
     :param dict mmcif_dict: the .mmcif dictionary to read.
     :param dict data_dict: the data dictionary to update."""
 
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "description", "code", "entry", "id")
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "description", "title", "struct", "title")
+    mmcif_to_data_transfer(mmcif_dict, data_dict, "description", "code", "entry", "id")
     mmcif_to_data_transfer(
-     mmcif_dict, data_dict, "description", "deposition_date",
-     "pdbx_database_status", "recvd_initial_deposition_date", date=True
+        mmcif_dict, data_dict, "description", "title", "struct", "title"
     )
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "description", "classification", "struct_keywords", "pdbx_keywords")
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "description", "keywords", "struct_keywords", "text", split=True)
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "description", "authors", "audit_author", "name", multi=True)
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "description",
+        "deposition_date",
+        "pdbx_database_status",
+        "recvd_initial_deposition_date",
+        date=True,
+    )
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "description",
+        "classification",
+        "struct_keywords",
+        "pdbx_keywords",
+    )
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "description",
+        "keywords",
+        "struct_keywords",
+        "text",
+        split=True,
+    )
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "description",
+        "authors",
+        "audit_author",
+        "name",
+        multi=True,
+    )
 
 
 def update_experiment_dict(mmcif_dict, data_dict):
@@ -241,23 +278,35 @@ def update_experiment_dict(mmcif_dict, data_dict):
     :param dict mmcif_dict: the .mmcif dictionary to read.
     :param dict data_dict: the data dictionary to update."""
 
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "experiment", "technique", "exptl", "method")
-    for cat, key in [["entity_src_nat", "pdbx_organism_scientific"],
-     ["entity_src_gen", "pdbx_gene_src_scientific_name"],
-     ["pdbx_entity_src_syn", "organism_scientific"]]:
-        mmcif_to_data_transfer(mmcif_dict, data_dict, "experiment",
-         "source_organism", cat, key)
+    mmcif_to_data_transfer(
+        mmcif_dict, data_dict, "experiment", "technique", "exptl", "method"
+    )
+    for cat, key in [
+        ["entity_src_nat", "pdbx_organism_scientific"],
+        ["entity_src_gen", "pdbx_gene_src_scientific_name"],
+        ["pdbx_entity_src_syn", "organism_scientific"],
+    ]:
+        mmcif_to_data_transfer(
+            mmcif_dict, data_dict, "experiment", "source_organism", cat, key
+        )
         if data_dict["experiment"]["source_organism"] not in [None, "?"]:
             break
-    mmcif_to_data_transfer(mmcif_dict, data_dict, "experiment",
-     "expression_system", "entity_src_gen", "pdbx_host_org_scientific_name")
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "experiment",
+        "expression_system",
+        "entity_src_gen",
+        "pdbx_host_org_scientific_name",
+    )
     for r in mmcif_dict.get("pdbx_unobs_or_zero_occ_residues", []):
         insert = "" if r["PDB_ins_code"] in "?." else r["PDB_ins_code"]
-        data_dict["experiment"]["missing_residues"].append({
-         "id": f"{r['auth_asym_id']}.{r['auth_seq_id']}{insert}",
-         "name": r["auth_comp_id"]
-        })
+        data_dict["experiment"]["missing_residues"].append(
+            {
+                "id": f"{r['auth_asym_id']}.{r['auth_seq_id']}{insert}",
+                "name": r["auth_comp_id"],
+            }
+        )
 
 
 def update_quality_dict(mmcif_dict, data_dict):
@@ -267,18 +316,53 @@ def update_quality_dict(mmcif_dict, data_dict):
     :param dict mmcif_dict: the .mmcif dictionary to read.
     :param dict data_dict: the data dictionary to update."""
 
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "quality", "resolution", "reflns", "d_resolution_high", func=float)
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "quality",
+        "resolution",
+        "reflns",
+        "d_resolution_high",
+        func=float,
+    )
     if not data_dict["quality"]["resolution"]:
-        mmcif_to_data_transfer(mmcif_dict, data_dict,
-         "quality", "resolution", "refine", "ls_d_res_high", func=float)
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "quality", "rvalue", "refine", "ls_R_factor_R_work", func=float)
+        mmcif_to_data_transfer(
+            mmcif_dict,
+            data_dict,
+            "quality",
+            "resolution",
+            "refine",
+            "ls_d_res_high",
+            func=float,
+        )
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "quality",
+        "rvalue",
+        "refine",
+        "ls_R_factor_R_work",
+        func=float,
+    )
     if not data_dict["quality"]["rvalue"]:
-        mmcif_to_data_transfer(mmcif_dict, data_dict,
-         "quality", "rvalue", "refine", "ls_R_factor_obs", func=float)
-    mmcif_to_data_transfer(mmcif_dict, data_dict,
-     "quality", "rfree", "refine", "ls_R_factor_R_free", func=float)
+        mmcif_to_data_transfer(
+            mmcif_dict,
+            data_dict,
+            "quality",
+            "rvalue",
+            "refine",
+            "ls_R_factor_obs",
+            func=float,
+        )
+    mmcif_to_data_transfer(
+        mmcif_dict,
+        data_dict,
+        "quality",
+        "rfree",
+        "refine",
+        "ls_R_factor_R_free",
+        func=float,
+    )
 
 
 def update_geometry_dict(mmcif_dict, data_dict):
@@ -288,15 +372,26 @@ def update_geometry_dict(mmcif_dict, data_dict):
     :param dict mmcif_dict: the .mmcif dictionary to read.
     :param dict data_dict: the data dictionary to update."""
 
-    data_dict["geometry"]["assemblies"] = [{
-     "id": int(a["id"]), "software": a.get("method_details", None),
-     "delta_energy": None, "buried_surface_area": None, "surface_area": None,
-     "transformations": []
-    } for a in mmcif_dict.get("pdbx_struct_assembly", [])]
-    operations = {o["id"]: [
-     [float(o["matrix[{}][{}]".format(r, c)]) for c in [1, 2, 3]
-    ] + [float(o["vector[{}]".format(r)])] for r in [1, 2, 3]] + [[0, 0, 0, 1]]
-     for o in mmcif_dict.get("pdbx_struct_oper_list", [])}
+    data_dict["geometry"]["assemblies"] = [
+        {
+            "id": int(a["id"]),
+            "software": a.get("method_details", None),
+            "delta_energy": None,
+            "buried_surface_area": None,
+            "surface_area": None,
+            "transformations": [],
+        }
+        for a in mmcif_dict.get("pdbx_struct_assembly", [])
+    ]
+    operations = {
+        o["id"]: [
+            [float(o["matrix[{}][{}]".format(r, c)]) for c in [1, 2, 3]]
+            + [float(o["vector[{}]".format(r)])]
+            for r in [1, 2, 3]
+        ]
+        + [[0, 0, 0, 1]]
+        for o in mmcif_dict.get("pdbx_struct_oper_list", [])
+    }
     for assembly in data_dict["geometry"]["assemblies"]:
         if assembly["software"] == "?":
             assembly["software"] = None
@@ -335,11 +430,13 @@ def assign_transformations_to_assembly(mmcif_dict, operations, assembly):
             op_ids_groups = get_operation_id_groups(gen["oper_expression"])
             ops = operation_id_groups_to_operations(operations, op_ids_groups)
             for operation in ops:
-                assembly["transformations"].append({
-                 "chains": gen["asym_id_list"].split(","),
-                 "matrix": [row[:3] for row in operation[:3]],
-                 "vector": [row[-1] for row in operation[:3]]
-                })
+                assembly["transformations"].append(
+                    {
+                        "chains": gen["asym_id_list"].split(","),
+                        "matrix": [row[:3] for row in operation[:3]],
+                        "vector": [row[-1] for row in operation[:3]],
+                    }
+                )
 
 
 def get_operation_id_groups(expression):
@@ -376,13 +473,24 @@ def update_crystallography_dict(mmcif_dict, data_dict):
     :param dict data_dict: the data dictionary to update."""
 
     if mmcif_dict.get("cell"):
-        mmcif_to_data_transfer(mmcif_dict, data_dict["geometry"],
-         "crystallography", "space_group", "symmetry", "space_group_name_H-M")
+        mmcif_to_data_transfer(
+            mmcif_dict,
+            data_dict["geometry"],
+            "crystallography",
+            "space_group",
+            "symmetry",
+            "space_group_name_H-M",
+        )
         data_dict["geometry"]["crystallography"]["unit_cell"] = [
-         float(mmcif_dict["cell"][0][key].replace("?", "0")) for key in [
-          "length_a", "length_b", "length_c",
-          "angle_alpha", "angle_beta", "angle_gamma"
-         ]
+            float(mmcif_dict["cell"][0][key].replace("?", "0"))
+            for key in [
+                "length_a",
+                "length_b",
+                "length_c",
+                "angle_alpha",
+                "angle_beta",
+                "angle_gamma",
+            ]
         ]
     if data_dict["geometry"]["crystallography"].get("space_group") == "NA":
         data_dict["geometry"]["crystallography"] = {}
@@ -395,9 +503,7 @@ def operation_id_groups_to_operations(operations, operation_id_groups):
     :param dict operations: the parsed .mmcif operations.
     :param list operation_id_groups: the operation IDs."""
 
-    operation_groups = [[
-     operations[i] for i in ids
-    ] for ids in operation_id_groups]
+    operation_groups = [[operations[i] for i in ids] for ids in operation_id_groups]
     while len(operation_groups) and len(operation_groups) != 1:
         operations = []
         for op1 in operation_groups[0]:
@@ -417,11 +523,12 @@ def update_models_list(mmcif_dict, data_dict):
 
     data_dict["models"] = []
     types = {e["id"]: e["type"] for e in mmcif_dict.get("entity", {})}
-    names = {e["id"]: e["name"] for e in mmcif_dict.get("chem_comp", {})
-     if e["mon_nstd_flag"] != "y"}
-    entities = {
-     m["id"]: m["entity_id"] for m in mmcif_dict.get("struct_asym", [])
+    names = {
+        e["id"]: e["name"]
+        for e in mmcif_dict.get("chem_comp", {})
+        if e["mon_nstd_flag"] != "y"
     }
+    entities = {m["id"]: m["entity_id"] for m in mmcif_dict.get("struct_asym", [])}
     secondary_structure = make_secondary_structure(mmcif_dict)
     aniso = make_aniso(mmcif_dict)
     model = {"polymer": {}, "non-polymer": {}, "water": {}, "branched": {}}
@@ -448,10 +555,13 @@ def make_aniso(mmcif_dict):
     :param mmcif_dict: the .mmcif dict to read.
     :rtype: ``dict``"""
 
-    return {int(a["id"]): [
-     float(a["U[{}][{}]".format(x, y)]) for
-      x, y in ["11", "22", "33", "12", "13", "23"]
-    ] for a in mmcif_dict.get("atom_site_anisotrop", [])}
+    return {
+        int(a["id"]): [
+            float(a["U[{}][{}]".format(x, y)])
+            for x, y in ["11", "22", "33", "12", "13", "23"]
+        ]
+        for a in mmcif_dict.get("atom_site_anisotrop", [])
+    }
 
 
 def make_secondary_structure(mmcif_dict):
@@ -463,15 +573,27 @@ def make_secondary_structure(mmcif_dict):
 
     helices, strands = [], []
     for helix in mmcif_dict.get("struct_conf", []):
-        helices.append(["{}.{}{}".format(
-         helix[f"{x}_auth_asym_id"], helix[f"{x}_auth_seq_id"],
-         helix[f"pdbx_{x}_PDB_ins_code"].replace("?", ""),
-        ) for x in ["beg", "end"]])
+        helices.append(
+            [
+                "{}.{}{}".format(
+                    helix[f"{x}_auth_asym_id"],
+                    helix[f"{x}_auth_seq_id"],
+                    helix[f"pdbx_{x}_PDB_ins_code"].replace("?", ""),
+                )
+                for x in ["beg", "end"]
+            ]
+        )
     for strand in mmcif_dict.get("struct_sheet_range", []):
-        strands.append(["{}.{}{}".format(
-         strand[f"{x}_auth_asym_id"], strand[f"{x}_auth_seq_id"],
-         strand[f"pdbx_{x}_PDB_ins_code"].replace("?", ""),
-        ) for x in ["beg", "end"]])
+        strands.append(
+            [
+                "{}.{}{}".format(
+                    strand[f"{x}_auth_asym_id"],
+                    strand[f"{x}_auth_seq_id"],
+                    strand[f"pdbx_{x}_PDB_ins_code"].replace("?", ""),
+                )
+                for x in ["beg", "end"]
+            ]
+        )
     return {"helices": helices, "strands": strands}
 
 
@@ -487,25 +609,31 @@ def add_atom_to_polymer(atom, aniso, model, names):
     mol_id = atom["auth_asym_id"]
     res_id = make_residue_id(atom)
     try:
-        model["polymer"][mol_id]["residues"][res_id]["atoms"][
-         int(atom["id"])
-        ] = atom_dict_to_atom_dict(atom, aniso)
+        model["polymer"][mol_id]["residues"][res_id]["atoms"][int(atom["id"])] = (
+            atom_dict_to_atom_dict(atom, aniso)
+        )
     except Exception:
         name = atom["auth_comp_id"]
         try:
             model["polymer"][mol_id]["residues"][res_id] = {
-             "name": name, "full_name": names.get(name),
-             "atoms": {int(atom["id"]) : atom_dict_to_atom_dict(atom, aniso)},
-             "number": len(model["polymer"][mol_id]["residues"]) + 1
+                "name": name,
+                "full_name": names.get(name),
+                "atoms": {int(atom["id"]): atom_dict_to_atom_dict(atom, aniso)},
+                "number": len(model["polymer"][mol_id]["residues"]) + 1,
             }
         except Exception:
             model["polymer"][mol_id] = {
-             "internal_id": atom["label_asym_id"], "helices": [], "strands": [],
-             "residues": {res_id: {
-              "name": name,
-              "atoms": {int(atom["id"]) : atom_dict_to_atom_dict(atom, aniso)},
-              "number": 1, "full_name": names.get(name),
-             }}
+                "internal_id": atom["label_asym_id"],
+                "helices": [],
+                "strands": [],
+                "residues": {
+                    res_id: {
+                        "name": name,
+                        "atoms": {int(atom["id"]): atom_dict_to_atom_dict(atom, aniso)},
+                        "number": 1,
+                        "full_name": names.get(name),
+                    }
+                },
             }
 
 
@@ -521,16 +649,17 @@ def add_atom_to_non_polymer(atom, aniso, model, mol_type, names):
 
     mol_id = make_residue_id(atom)
     try:
-        model[mol_type][mol_id]["atoms"][
-         int(atom["id"])
-        ] = atom_dict_to_atom_dict(atom, aniso)
+        model[mol_type][mol_id]["atoms"][int(atom["id"])] = atom_dict_to_atom_dict(
+            atom, aniso
+        )
     except Exception:
         name = atom["auth_comp_id"]
         model[mol_type][mol_id] = {
-         "name": name, "full_name": names.get(name),
-         "internal_id": atom["label_asym_id"],
-         "polymer": atom["auth_asym_id"],
-         "atoms": {int(atom["id"]): atom_dict_to_atom_dict(atom, aniso)},
+            "name": name,
+            "full_name": names.get(name),
+            "internal_id": atom["label_asym_id"],
+            "polymer": atom["auth_asym_id"],
+            "atoms": {int(atom["id"]): atom_dict_to_atom_dict(atom, aniso)},
         }
 
 
@@ -555,7 +684,7 @@ def add_sequences_to_polymers(model, mmcif_dict, entities):
     sequences = make_sequences(mmcif_dict)
     for polymer in model["polymer"].values():
         polymer["sequence"] = sequences.get(
-         entities.get(polymer["internal_id"], ""), ""
+            entities.get(polymer["internal_id"], ""), ""
         )
 
 
@@ -568,7 +697,7 @@ def add_secondary_structure_to_polymers(model, ss_dict):
 
     for ss in ("helices", "strands"):
         for segment in ss_dict[ss]:
-            chain = model["polymer"].get(segment[0].split('.')[0])
+            chain = model["polymer"].get(segment[0].split(".")[0])
             if chain:
                 in_segment = False
                 chain[ss].append([])
@@ -579,7 +708,7 @@ def add_secondary_structure_to_polymers(model, ss_dict):
                         chain[ss][-1].append(residue_id)
                     if residue_id == segment[1]:
                         break
-            
+
 
 def make_sequences(mmcif_dict):
     """Creates a mapping of entity IDs to sequences.
@@ -587,10 +716,17 @@ def make_sequences(mmcif_dict):
     :param dict mmcif_dict: the .mmcif dictionary to read.
     :rtype: ``dict``"""
 
-    return {e["id"]: "".join([
-     CODES.get(res["mon_id"], "X") for res in
-      mmcif_dict.get("entity_poly_seq", []) if res["entity_id"] == e["id"]
-    ]) for e in mmcif_dict.get("entity", []) if e["type"] == "polymer"}
+    return {
+        e["id"]: "".join(
+            [
+                CODES.get(res["mon_id"], "X")
+                for res in mmcif_dict.get("entity_poly_seq", [])
+                if res["entity_id"] == e["id"]
+            ]
+        )
+        for e in mmcif_dict.get("entity", [])
+        if e["type"] == "polymer"
+    }
 
 
 def atom_dict_to_atom_dict(d, aniso_dict):
@@ -602,12 +738,17 @@ def atom_dict_to_atom_dict(d, aniso_dict):
 
     charge = "pdbx_formal_charge"
     atom = {
-     "x": d["Cartn_x"], "y": d["Cartn_y"], "z": d["Cartn_z"],
-     "element": d["type_symbol"], "name": d.get("label_atom_id"),
-     "occupancy": d.get("occupancy", 1), "bvalue": d.get("B_iso_or_equiv"),
-     "charge": d.get(charge, 0) if d.get(charge) != "?" else 0,
-     "alt_loc": d.get("label_alt_id") if d.get("label_alt_id") != "." else None,
-     "anisotropy": aniso_dict.get(int(d["id"]), [0, 0, 0, 0, 0, 0]), "is_hetatm": False
+        "x": d["Cartn_x"],
+        "y": d["Cartn_y"],
+        "z": d["Cartn_z"],
+        "element": d["type_symbol"],
+        "name": d.get("label_atom_id"),
+        "occupancy": d.get("occupancy", 1),
+        "bvalue": d.get("B_iso_or_equiv"),
+        "charge": d.get(charge, 0) if d.get(charge) != "?" else 0,
+        "alt_loc": d.get("label_alt_id") if d.get("label_alt_id") != "." else None,
+        "anisotropy": aniso_dict.get(int(d["id"]), [0, 0, 0, 0, 0, 0]),
+        "is_hetatm": False,
     }
     for key in ["x", "y", "z", "charge", "bvalue", "occupancy"]:
         if atom[key] is not None:
@@ -615,8 +756,18 @@ def atom_dict_to_atom_dict(d, aniso_dict):
     return atom
 
 
-def mmcif_to_data_transfer(mmcif_dict, data_dict, d_cat, d_key, m_table, m_key,
-                           date=False, split=False, multi=False, func=None):
+def mmcif_to_data_transfer(
+    mmcif_dict,
+    data_dict,
+    d_cat,
+    d_key,
+    m_table,
+    m_key,
+    date=False,
+    split=False,
+    multi=False,
+    func=None,
+):
     """A function for transfering a bit of data from a .mmcif dictionary to a
     data dictionary, or doing nothing if the data doesn't exist.
 
@@ -655,23 +806,49 @@ def structure_to_mmcif_string(structure):
 
     lines = ["data_atomium"]
     chains, ligands, waters = set(), set(), set()
-    atom_lines = ["#", "loop_"] + ["_atom_site." + field for field in [
-     "group_PDB", "id", "type_symbol", "label_atom_id", "label_alt_id",
-     "label_comp_id", "label_asym_id", "label_entity_id", "label_seq_id",
-     "pdbx_PDB_ins_code", "Cartn_x", "Cartn_y", "Cartn_z", "occupancy",
-     "B_iso_or_equiv", "pdbx_formal_charge", "auth_seq_id",
-     "auth_comp_id", "auth_asym_id", "auth_atom_id", "pdbx_PDB_model_num"
-    ]]
-    aniso_lines = ["#", "loop_"] + ["_atom_site_anisotrop." + f for f in [
-     "id", "U[1][1]", "U[2][2]", "U[3][3]", "U[1][2]", "U[1][3]", "U[2][3]",
-    ]]
+    atom_lines = ["#", "loop_"] + [
+        "_atom_site." + field
+        for field in [
+            "group_PDB",
+            "id",
+            "type_symbol",
+            "label_atom_id",
+            "label_alt_id",
+            "label_comp_id",
+            "label_asym_id",
+            "label_entity_id",
+            "label_seq_id",
+            "pdbx_PDB_ins_code",
+            "Cartn_x",
+            "Cartn_y",
+            "Cartn_z",
+            "occupancy",
+            "B_iso_or_equiv",
+            "pdbx_formal_charge",
+            "auth_seq_id",
+            "auth_comp_id",
+            "auth_asym_id",
+            "auth_atom_id",
+            "pdbx_PDB_model_num",
+        ]
+    ]
+    aniso_lines = ["#", "loop_"] + [
+        "_atom_site_anisotrop." + f
+        for f in [
+            "id",
+            "U[1][1]",
+            "U[2][2]",
+            "U[3][3]",
+            "U[1][2]",
+            "U[1][3]",
+            "U[2][3]",
+        ]
+    ]
     for atom in sorted(structure.atoms(), key=lambda a: a.id):
         get_structure_from_atom(atom, chains, ligands, waters)
         atom_lines.append(atom_to_atom_line(atom))
         if atom.anisotropy != [0, 0, 0, 0, 0, 0]:
-            aniso_lines.append(
-             "{} {} {} {} {} {} {}".format(atom.id, *atom.anisotropy)
-            )
+            aniso_lines.append("{} {} {} {} {} {} {}".format(atom.id, *atom.anisotropy))
     entities = create_entities(chains, ligands, waters)
     update_lines_with_entities(lines, entities)
     update_lines_with_structures(lines, chains, ligands, waters, entities)
@@ -707,14 +884,26 @@ def atom_to_atom_line(atom):
     name = get_atom_name(atom)
     res_num, res_insert = split_residue_id(atom)
     return "ATOM {} {} {} . {} {} . {} {} {} {} {} 1 {} {} {} {} {} {} 1".format(
-     atom.id, atom.element, name, atom.het._name if atom.het else "?",
-     atom.het._internal_id if atom.het and isinstance(
-      atom.het, Ligand
-     ) else atom.chain._internal_id if atom.chain else ".",
-     res_num, res_insert, atom.location[0], atom.location[1], atom.location[2],
-     atom.bvalue, atom.charge,
-     res_num, atom.het._name if atom.het else "?",
-     atom.chain.id if atom.chain else ".", name
+        atom.id,
+        atom.element,
+        name,
+        atom.het._name if atom.het else "?",
+        (
+            atom.het._internal_id
+            if atom.het and isinstance(atom.het, Ligand)
+            else atom.chain._internal_id if atom.chain else "."
+        ),
+        res_num,
+        res_insert,
+        atom.location[0],
+        atom.location[1],
+        atom.location[2],
+        atom.bvalue,
+        atom.charge,
+        res_num,
+        atom.het._name if atom.het else "?",
+        atom.chain.id if atom.chain else ".",
+        name,
     )
 
 
@@ -734,11 +923,13 @@ def split_residue_id(atom):
     :rtype: ``tuple``"""
 
     if atom.het:
-        id = atom.het.id.split(".")[-1]
-        num = "".join([c for c in id if c.isdigit()])
-        insert = "".join([c for c in id if c.isalpha()]) or "?"
+        id_ = atom.het.id.split(".")[-1]
+        num = "".join([c for c in id_ if c.isdigit() or c == "-"])
+        insert = "".join([c for c in id_ if not (c.isdigit() or c == "-")])
+        if not num:
+            return "0", insert
         return num, insert
-    return ".."
+    return ".", "."
 
 
 def create_entities(chains, ligands, waters):
@@ -775,15 +966,28 @@ def update_lines_with_entities(lines, entities):
 
     lines += ["#", "loop_", "_entity.id", "_entity.type"]
     for i, entity in enumerate(entities, start=1):
-        lines.append("{} {}".format(i, "polymer" if isinstance(entity, Chain)
-         else "water" if entity.is_water else "non-polymer"))
+        lines.append(
+            "{} {}".format(
+                i,
+                (
+                    "polymer"
+                    if isinstance(entity, Chain)
+                    else "water" if entity.is_water else "non-polymer"
+                ),
+            )
+        )
     if any(isinstance(entity, Chain) for entity in entities):
-        lines += ["#", "loop_", "_entity_poly_seq.entity_id",
-         "_entity_poly_seq.num", "_entity_poly_seq.mon_id"]
+        lines += [
+            "#",
+            "loop_",
+            "_entity_poly_seq.entity_id",
+            "_entity_poly_seq.num",
+            "_entity_poly_seq.mon_id",
+        ]
         for ei, entity in enumerate(entities, start=1):
             if isinstance(entity, Chain):
                 for ci, code in enumerate(
-                 [ONE_TO_THREE.get(c, "UNK") for c in entity.sequence], start=1
+                    [ONE_TO_THREE.get(c, "UNK") for c in entity.sequence], start=1
                 ):
                     lines.append("{} {} {}".format(ei, ci, code))
 
@@ -813,6 +1017,6 @@ def update_lines_with_structures(lines, chains, ligands, waters, entities):
         if water.chain not in water_chains:
             for i, entity in enumerate(entities, start=1):
                 if isinstance(entity, Ligand) and entity.is_water:
-                    lines.append("{} {}".format(water._internal_id, i))
+                    lines.append("{} {}".format(water._internal_d, i))
                     water_chains.append(water.chain)
                     break

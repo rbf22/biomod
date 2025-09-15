@@ -1,6 +1,7 @@
 """
 This module handles reading of PDB and mmCIF files.
 """
+
 import builtins
 import gzip
 from . import pdb
@@ -11,9 +12,11 @@ from ..core.residues import Residue
 from ..core.atoms import Atom
 from .builder import data_dict_to_file
 
+
 class PdbFile:
     def __init__(self, model):
         self.model = model
+
 
 def open(path, data_dict=False, file_dict=False):
     """
@@ -77,14 +80,16 @@ def data_dict_to_model(data_dict):
             for atom_id, atom_dict in res_dict["atoms"].items():
                 atom = Atom(
                     atom_dict["element"],
-                    atom_dict["x"], atom_dict["y"], atom_dict["z"],
-                    id=atom_id, name=atom_dict["name"], charge=atom_dict["charge"],
-                    bvalue=atom_dict["bvalue"]
+                    atom_dict["x"],
+                    atom_dict["y"],
+                    atom_dict["z"],
+                    id=atom_id,
+                    name=atom_dict["name"],
+                    charge=atom_dict["charge"],
+                    bvalue=atom_dict["bvalue"],
                 )
                 atoms.append(atom)
-            residue = Residue(
-                *atoms, id=res_id, name=res_dict["name"]
-            )
+            residue = Residue(*atoms, id=res_id, name=res_dict["name"])
             residues.append(residue)
         chain = Chain(*residues, id=chain_id)
         chains.append(chain)

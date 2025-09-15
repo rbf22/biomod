@@ -49,7 +49,6 @@ def parse_reference_accessibility(filepath):
             header_count = 0
     return accessibilities
 
-@pytest.mark.skip(reason="This test fails with a large discrepancy between calculated and reference accessibility values.")
 def test_calculate_accessibility_comparative():
     """
     Tests the calculate_accessibility function by comparing its output to a
