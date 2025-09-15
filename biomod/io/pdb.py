@@ -6,7 +6,8 @@ from itertools import groupby, chain
 from math import ceil
 from ..core.constants import CODES, ONE_TO_THREE
 from ..core.residues import Residue, Ligand
-from .mmcif import add_secondary_structure_to_polymers
+from .mmcif import add_secondary_structure_to_polymers, split_residue_id
+
 
 def pdb_string_to_pdb_dict(filestring):
     """Takes a .pdb filestring and turns into a ``dict`` which represents its
@@ -73,14 +74,23 @@ def pdb_dict_to_data_dict(pdb_dict):
     :rtype: ``dict``"""
 
     data_dict = {
-     "description": {
-      "code": None, "title": None, "deposition_date": None,
-      "classification": None, "keywords": [], "authors": []
-     }, "experiment": {
-      "technique": None, "source_organism": None, "expression_system": None,
-      "missing_residues": []
-     }, "quality": {"resolution": None, "rvalue": None, "rfree": None},
-      "geometry": {"assemblies": [], "crystallography": {}}, "models": []
+        "description": {
+            "code": None,
+            "title": None,
+            "deposition_date": None,
+            "classification": None,
+            "keywords": [],
+            "authors": [],
+        },
+        "experiment": {
+            "technique": None,
+            "source_organism": None,
+            "expression_system": None,
+            "missing_residues": [],
+        },
+        "quality": {"resolution": None, "rvalue": None, "rfree": None},
+        "geometry": {"assemblies": [], "crystallography": {}},
+        "models": [],
     }
     update_description_dict(pdb_dict, data_dict)
     update_experiment_dict(pdb_dict, data_dict)
@@ -215,7 +225,9 @@ def update_models_list(pdb_dict, data_dict):
                 res_id = id_from_line(line)
                 if res_id in modres:
                     chain_id = line[21]
-                    add_atom_to_polymer(line, model, chain_id, res_id, aniso, full_names)
+                    add_atom_to_polymer(
+                        line, model, chain_id, res_id, aniso, full_names
+                    )
                 else:
                     add_atom_to_non_polymer(line, model, res_id, aniso, full_names)
 
@@ -237,7 +249,7 @@ def extract_header(pdb_dict, description_dict):
         line = pdb_dict["HEADER"][0]
         if line[50:59].strip():
             description_dict["deposition_date"] = datetime.strptime(
-             line[50:59], "%d-%b-%y"
+                line[50:59], "%d-%b-%y"
             ).date()
         if line[62:66].strip():
             description_dict["code"] = line[62:66]
@@ -302,8 +314,8 @@ def extract_source(pdb_dict, experiment_dict):
     if pdb_dict.get("SOURCE"):
         data = merge_lines(pdb_dict["SOURCE"], 10)
         patterns = {
-         "source_organism": r"ORGANISM_SCIENTIFIC\: (.+?);",
-         "expression_system": r"EXPRESSION_SYSTEM\: (.+?);"
+            "source_organism": r"ORGANISM_SCIENTIFIC\: (.+?);",
+            "expression_system": r"EXPRESSION_SYSTEM\: (.+?);",
         }
         for attribute, pattern in patterns.items():
             matches = re.findall(pattern, data)
@@ -321,9 +333,9 @@ def extract_missing_residues(pdb_dict, experiment_dict):
     for line in pdb_dict.get("REMARK", {}).get("465", []):
         chunks = line.strip().split()
         if len(chunks) == 5:
-            experiment_dict["missing_residues"].append({
-             "name": chunks[2], "id": f"{chunks[3]}.{chunks[4]}"
-            })
+            experiment_dict["missing_residues"].append(
+                {"name": chunks[2], "id": f"{chunks[3]}.{chunks[4]}"}
+            )
 
 
 def extract_resolution_remark(pdb_dict, quality_dict):
@@ -351,8 +363,8 @@ def extract_rvalue_remark(pdb_dict, quality_dict):
 
     if pdb_dict.get("REMARK") and pdb_dict["REMARK"].get("3"):
         patterns = {
-         "rvalue": r"R VALUE.+WORKING.+?: (.+)",
-         "rfree": r"FREE R VALUE[ ]{2,}: (.+)",
+            "rvalue": r"R VALUE.+WORKING.+?: (.+)",
+            "rfree": r"FREE R VALUE[ ]{2,}: (.+)",
         }
         for attribute, pattern in patterns.items():
             for remark in pdb_dict["REMARK"]["3"]:
@@ -373,14 +385,13 @@ def extract_assembly_remark(pdb_dict, geometry_dict):
     :param dict geometry_dict: the ``dict`` to update."""
 
     if pdb_dict.get("REMARK") and pdb_dict["REMARK"].get("350"):
-        groups = [list(g) for k, g in groupby(
-         pdb_dict["REMARK"]["350"], lambda x: "ECULE:" in x
-        )][1:]
+        groups = [
+            list(g)
+            for k, g in groupby(pdb_dict["REMARK"]["350"], lambda x: "ECULE:" in x)
+        ][1:]
         assemblies = [list(chain(*a)) for a in zip(groups[::2], groups[1::2])]
         for a in assemblies:
-            geometry_dict["assemblies"].append(
-             assembly_lines_to_assembly_dict(a)
-            )
+            geometry_dict["assemblies"].append(assembly_lines_to_assembly_dict(a))
 
 
 def assembly_lines_to_assembly_dict(lines):
@@ -391,14 +402,20 @@ def assembly_lines_to_assembly_dict(lines):
     :rtype: ``dict``"""
 
     assembly = {
-     "transformations": [], "software": None, "buried_surface_area": None,
-     "surface_area": None, "delta_energy": None, "id": 0
+        "transformations": [],
+        "software": None,
+        "buried_surface_area": None,
+        "surface_area": None,
+        "delta_energy": None,
+        "id": 0,
     }
-    patterns = [[r"(.+)SOFTWARE USED: (.+)", "software", lambda x: x],
-     [r"(.+)BIOMOLECULE: (.+)", "id", int],
-     [r"(.+)SURFACE AREA: (.+) [A-Z]", "buried_surface_area", float],
-     [r"(.+)AREA OF THE COMPLEX: (.+) [A-Z]", "surface_area", float],
-     [r"(.+)FREE ENERGY: (.+) [A-Z]", "delta_energy", float]]
+    patterns = [
+        [r"(.+)SOFTWARE USED: (.+)", "software", lambda x: x],
+        [r"(.+)BIOMOLECULE: (.+)", "id", int],
+        [r"(.+)SURFACE AREA: (.+) [A-Z]", "buried_surface_area", float],
+        [r"(.+)AREA OF THE COMPLEX: (.+) [A-Z]", "surface_area", float],
+        [r"(.+)FREE ENERGY: (.+) [A-Z]", "delta_energy", float],
+    ]
     t = None
     for line in lines:
         for p in patterns:
@@ -410,8 +427,9 @@ def assembly_lines_to_assembly_dict(lines):
                 assembly["transformations"].append(t)
             t = {"chains": [], "matrix": [], "vector": []}
         if "CHAINS:" in line:
-            t["chains"] += [c.strip() for c in
-             line.split(":")[-1].strip().split(",") if c.strip()]
+            t["chains"] += [
+                c.strip() for c in line.split(":")[-1].strip().split(",") if c.strip()
+            ]
         if "BIOMT" in line:
             values = [float(x) for x in line.split()[4:]]
             if len(t["matrix"]) == 3:
@@ -435,9 +453,9 @@ def extract_crystallography(pdb_dict, geometry_dict):
         line = pdb_dict["CRYST1"][0]
         values = line.split()
         geometry_dict["crystallography"]["space_group"] = line[55:66].strip()
-        geometry_dict["crystallography"]["unit_cell"] = [
-         float(val) for val in values[1:7]
-        ] if len(values) >= 6 else []
+        geometry_dict["crystallography"]["unit_cell"] = (
+            [float(val) for val in values[1:7]] if len(values) >= 6 else []
+        )
 
 
 def make_sequences(pdb_dict):
@@ -465,15 +483,19 @@ def make_secondary_structure(pdb_dict):
 
     helices, strands = [], []
     for helix in pdb_dict.get("HELIX", []):
-        helices.append([
-         f"{helix[19]}.{helix[21:25].strip()}{helix[25].strip()}",
-         f"{helix[31]}.{helix[33:37].strip()}{helix[37].strip() if len(helix) > 37 else ''}",
-        ])
+        helices.append(
+            [
+                f"{helix[19]}.{helix[21:25].strip()}{helix[25].strip()}",
+                f"{helix[31]}.{helix[33:37].strip()}{helix[37].strip() if len(helix) > 37 else ''}",
+            ]
+        )
     for strand in pdb_dict.get("SHEET", []):
-        strands.append([
-         f"{strand[21]}.{strand[22:26].strip()}{strand[26].strip()}",
-         f"{strand[32]}.{strand[33:37].strip()}{strand[37].strip() if len(strand) > 37 else ''}",
-        ])
+        strands.append(
+            [
+                f"{strand[21]}.{strand[22:26].strip()}{strand[26].strip()}",
+                f"{strand[32]}.{strand[33:37].strip()}{strand[37].strip() if len(strand) > 37 else ''}",
+            ]
+        )
     return {"helices": helices, "strands": strands}
 
 
@@ -498,9 +520,13 @@ def make_aniso(model_lines):
     :param dict pdb_dict: the .pdb dictionary to read.
     :rtype: ``dict``"""
 
-    return {int(line[6:11].strip()): [
-     int(line[n * 7 + 28:n * 7 + 35]) / 10000 for n in range(6)
-    ] for line in model_lines if line[:6] == "ANISOU"}
+    return {
+        int(line[6:11].strip()): [
+            int(line[n * 7 + 28 : n * 7 + 35]) / 10000 for n in range(6)
+        ]
+        for line in model_lines
+        if line[:6] == "ANISOU"
+    }
 
 
 def get_last_ter_line(model_lines):
@@ -538,25 +564,31 @@ def add_atom_to_polymer(line, model, chain_id, res_id, aniso_dict, full_names):
     :param dict aniso_dict: lookup dictionary for anisotropy information."""
 
     try:
-        model["polymer"][chain_id]["residues"][res_id]["atoms"][
-         int(line[6:11])
-        ] = atom_line_to_dict(line, aniso_dict)
+        model["polymer"][chain_id]["residues"][res_id]["atoms"][int(line[6:11])] = (
+            atom_line_to_dict(line, aniso_dict)
+        )
     except Exception:
         name = line[17:20].strip()
         try:
             model["polymer"][chain_id]["residues"][res_id] = {
-             "name": name, "full_name": full_names.get(name),
-             "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)},
-             "number": len(model["polymer"][chain_id]["residues"]) + 1
+                "name": name,
+                "full_name": full_names.get(name),
+                "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)},
+                "number": len(model["polymer"][chain_id]["residues"]) + 1,
             }
         except Exception:
             model["polymer"][chain_id] = {
-             "internal_id": chain_id, "helices": [], "strands": [],
-             "residues": {res_id: {
-              "name": line[17:20].strip(),
-              "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)},
-              "number": 1, "full_name": None,
-             }}
+                "internal_id": chain_id,
+                "helices": [],
+                "strands": [],
+                "residues": {
+                    res_id: {
+                        "name": line[17:20].strip(),
+                        "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)},
+                        "number": 1,
+                        "full_name": None,
+                    }
+                },
             }
 
 
@@ -571,15 +603,17 @@ def add_atom_to_non_polymer(line, model, res_id, aniso_dict, full_names):
 
     key = "water" if line[17:20] in ["HOH", "DOD"] else "non-polymer"
     try:
-        model[key][res_id]["atoms"][
-         int(line[6:11])
-        ] = atom_line_to_dict(line, aniso_dict)
+        model[key][res_id]["atoms"][int(line[6:11])] = atom_line_to_dict(
+            line, aniso_dict
+        )
     except Exception:
         name = line[17:20].strip()
         model[key][res_id] = {
-         "name": name, "full_name": full_names.get(name),
-         "internal_id": line[21], "polymer": line[21],
-         "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)}
+            "name": name,
+            "full_name": full_names.get(name),
+            "internal_id": line[21],
+            "polymer": line[21],
+            "atoms": {int(line[6:11]): atom_line_to_dict(line, aniso_dict)},
         }
 
 
@@ -591,8 +625,10 @@ def atom_line_to_dict(line, aniso_dict):
     :rtype: ``dict``"""
 
     a = {
-     "occupancy": 1, "bvalue": None, "charge": 0,
-     "anisotropy": aniso_dict.get(int(line[6:11].strip()), [0, 0, 0, 0, 0, 0])
+        "occupancy": 1,
+        "bvalue": None,
+        "charge": 0,
+        "anisotropy": aniso_dict.get(int(line[6:11].strip()), [0, 0, 0, 0, 0, 0]),
     }
     a["is_hetatm"] = line[:6] == "HETATM"
     a["name"] = line[12:16].strip() or None
@@ -637,10 +673,14 @@ def structure_to_pdb_string(structure):
     for i, atom in enumerate(atoms):
         atom_to_atom_line(atom, lines)
         if isinstance(atom.het, Residue) and (
-         atom is atoms[-1] or atoms[i + 1].chain is not atom.chain or
-          isinstance(atoms[i + 1].het, Ligand)):
+            i == len(atoms) - 1
+            or atoms[i + 1].chain is not atom.chain
+            or isinstance(atoms[i + 1].het, Ligand)
+        ):
             last = lines[-1]
-            lines.append(f"TER   {last[6:11]}      {last[17:20]} {last[21]}{last[22:26]}{last[26]}")
+            lines.append(
+                f"TER   {last[6:11]}      {last[17:20]} {last[21]}{last[22:26]}{last[26]}"
+            )
     return "\n".join(lines)
 
 
@@ -656,10 +696,14 @@ def pack_sequences(structure, lines):
             length = len(residues)
             line_count = ceil(length / 13)
             for line_num in range(line_count):
-                lines += ["SEQRES {:>3} {} {:>4}  {}".format(
-                 line_num + 1, chain.id, length,
-                 " ".join(residues[line_num * 13: (line_num + 1) * 13])
-                )]
+                lines += [
+                    "SEQRES {:>3} {} {:>4}  {}".format(
+                        line_num + 1,
+                        chain.id,
+                        length,
+                        " ".join(residues[line_num * 13 : (line_num + 1) * 13]),
+                    )
+                ]
     except AttributeError:
         pass
 
@@ -673,27 +717,35 @@ def atom_to_atom_line(a, lines):
 
     line = "{:6}{:5} {:4} {:3} {:1}{:4}{:1}   "
     line += "{:>8}{:>8}{:>8}  1.00{:6}          {:>2}{:2}"
-    id_, residue_name, chain_id, residue_id, insert_code = "", "", "", "", ""
+    residue_name, chain_id = "", ""
     if a.het:
-        id_, residue_name = a.het.id, a.het._name
+        residue_name = a.het._name
         chain_id = a.chain.id if a.chain is not None else ""
-        residue_id = int("".join([c for c in id_ if c.isdigit() or c == "-"]))
-        insert_code = id_[-1] if id_ and id_[-1].isalpha() else ""
+    residue_id, insert_code = split_residue_id(a)
     atom_name = a._name or ""
     atom_name = " " + atom_name if len(atom_name) < 4 else atom_name
     line = line.format(
-     "HETATM" if isinstance(a.het, Ligand) or a._is_hetatm else "ATOM",
-     a.id, atom_name, residue_name, chain_id, residue_id, insert_code,
-     "{:.3f}".format(a.location[0]) if a.location[0] is not None else "",
-     "{:.3f}".format(a.location[1]) if a.location[1] is not None else "",
-     "{:.3f}".format(a.location[2]) if a.location[2] is not None else "",
-     "{:.2f}".format(a.bvalue).strip().rjust(6) if a.bvalue is not None else "",
-     a.element or "", str(int(a.charge))[::-1] if a.charge else "",
+        "HETATM" if isinstance(a.het, Ligand) or a._is_hetatm else "ATOM",
+        a.id,
+        atom_name,
+        residue_name,
+        chain_id,
+        int(residue_id),
+        insert_code,
+        "{:.3f}".format(a.location[0]) if a.location[0] is not None else "",
+        "{:.3f}".format(a.location[1]) if a.location[1] is not None else "",
+        "{:.3f}".format(a.location[2]) if a.location[2] is not None else "",
+        "{:.2f}".format(a.bvalue).strip().rjust(6) if a.bvalue is not None else "",
+        a.element or "",
+        str(int(a.charge))[::-1] if a.charge else "",
     )
     lines.append(line)
     if a.anisotropy != [0, 0, 0, 0, 0, 0]:
-        lines.append(atom_to_anisou_line(a, atom_name,
-         residue_name, chain_id, residue_id, insert_code))
+        lines.append(
+            atom_to_anisou_line(
+                a, atom_name, residue_name, chain_id, int(residue_id), insert_code
+            )
+        )
 
 
 def atom_to_anisou_line(a, name, res_name, chain_id, res_id, insert):
@@ -709,12 +761,21 @@ def atom_to_anisou_line(a, name, res_name, chain_id, res_id, insert):
 
     line = "ANISOU{:5} {:4} {:3} {:1}{:4}{:1} "
     line += "{:>7}{:>7}{:>7}{:>7}{:>7}{:>7}      {:>2}{:2}"
-    anisotropy = [round(x * 10000 )for x in a.anisotropy]
+    anisotropy = [round(x * 10000) for x in a.anisotropy]
     line = line.format(
-     a.id, name, res_name, chain_id, res_id, insert,
-     anisotropy[0], anisotropy[1], anisotropy[2],
-     anisotropy[3], anisotropy[4], anisotropy[5],
-     a.element if a.element else "",
-     str(int(a.charge))[::-1] if a.charge else "",
+        a.id,
+        name,
+        res_name,
+        chain_id,
+        res_id,
+        insert,
+        anisotropy[0],
+        anisotropy[1],
+        anisotropy[2],
+        anisotropy[3],
+        anisotropy[4],
+        anisotropy[5],
+        a.element if a.element else "",
+        str(int(a.charge))[::-1] if a.charge else "",
     )
     return line
