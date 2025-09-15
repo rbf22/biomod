@@ -5,9 +5,8 @@ from biomod.core.atoms import Atom
 from biomod.core.residues import Residue, Ligand
 from biomod.core.base import Chain, Model
 from biomod.io import io
-from unittest import TestCase
 
-class DeNovoStructureTests(TestCase):
+class TestDeNovoStructure:
 
     def test_structure_processing(self):
         # Create five atoms of a residue
@@ -18,74 +17,74 @@ class DeNovoStructureTests(TestCase):
         atom5 = Atom("O", 3, -1.5, 0, 5, "O", 0, 0.1, [0] * 6)
 
         # Check basic atom properties
-        self.assertEqual(atom2.element, "C")
-        self.assertEqual(atom1.location, (0, 0, 0))
-        self.assertEqual(tuple(atom1), (0, 0, 0))
-        self.assertEqual(atom2.name, "CA")
-        self.assertEqual(atom1.charge, 0.5)
-        self.assertEqual(atom2.charge, 0)
-        self.assertEqual(atom2.bvalue, 0.4)
-        self.assertEqual(atom3.anisotropy, [1] * 6)
+        assert atom2.element == "C"
+        assert atom1.location == (0, 0, 0)
+        assert tuple(atom1) == (0, 0, 0)
+        assert atom2.name == "CA"
+        assert atom1.charge == 0.5
+        assert atom2.charge == 0
+        assert atom2.bvalue == 0.4
+        assert atom3.anisotropy == [1] * 6
 
         # Check can update some properties
         atom1.name = "HG"
         atom1.charge = 200
         atom1.bvalue = 20
-        self.assertEqual(atom1.name, "HG")
-        self.assertEqual(atom1.charge, 200)
-        self.assertEqual(atom1.bvalue, 20)
+        assert atom1.name == "HG"
+        assert atom1.charge == 200
+        assert atom1.bvalue == 20
         atom1.name = "N"
         atom1.charge = 0.5
         atom1.bvalue = 0.5
 
         # Check atoms are not part of any higher structures
         for atom in (atom1, atom2, atom3, atom4, atom5):
-            self.assertIsNone(atom.het)
-            self.assertIsNone(atom.chain)
-            self.assertIsNone(atom.model)
-            self.assertEqual(atom.bonded_atoms, set())
+            assert atom.het is None
+            assert atom.chain is None
+            assert atom.model is None
+            assert atom.bonded_atoms == set()
 
         # Check atoms' calculated properties
-        self.assertAlmostEqual(atom5.mass, 16, delta=0.05)
-        self.assertEqual(atom5.atomic_number, 8)
-        self.assertEqual(atom1.covalent_radius, 0.71)
+        assert atom5.mass == pytest.approx(16, abs=0.05)
+        assert atom5.atomic_number == 8
+        assert atom1.covalent_radius == 0.71
         for atom in (atom1, atom2, atom3, atom4, atom5):
-            self.assertFalse(atom.is_metal)
-            self.assertFalse(atom.is_backbone) # Not yet
-            self.assertFalse(atom.is_side_chain) # Not yet
+            assert not atom.is_metal
+            assert not atom.is_backbone # Not yet
+            assert not atom.is_side_chain # Not yet
 
         # Check atom magic methods
-        self.assertEqual(list(atom5), [3, -1.5, 0])
+        assert list(atom5) == [3, -1.5, 0]
         for a1 in (atom1, atom2, atom3, atom4, atom5):
             for a2 in (atom1, atom2, atom3, atom4, atom5):
                 if a1 is a2:
-                    self.assertEqual(a1, a2)
+                    assert a1 == a2
                 else:
-                    self.assertNotEqual(a1, a2)
+                    assert a1 != a2
 
         # Check atom safe methods
-        self.assertEqual(atom1.distance_to(atom2), 1.5)
-        self.assertEqual(atom1.distance_to(atom3), 4.5 ** 0.5)
-        self.assertEqual(atom2.angle(atom3, atom4), math.pi / 2)
+        assert atom1.distance_to(atom2) == 1.5
+        assert atom1.distance_to(atom3) == 4.5 ** 0.5
+        assert atom2.angle(atom3, atom4) == math.pi / 2
         for atom in (atom1, atom2, atom3, atom4, atom5):
-            self.assertEqual(atom.nearby_atoms(5), set()) # Not without model
-            self.assertEqual(atom.nearby_hets(5), set()) # Ditto
+            assert atom.nearby_atoms(5) == set() # Not without model
+            assert atom.nearby_hets(5) == set() # Ditto
 
         # Check atom side effect methods
         atom2.translate(0, 0, 1)
-        self.assertEqual(atom2.location, (1.5, 0, 1))
+        assert atom2.location == (1.5, 0, 1)
         atom2.translate(0, 0, -1)
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
         atom2.transform([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-        self.assertEqual(atom2.location, (-1.5, 0, 0))
+        assert atom2.location == (-1.5, 0, 0)
         atom2.transform([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
         atom2.rotate(math.pi / 2, "y")
-        self.assertEqual(atom2.location, (0, 0, -1.5))
+        assert atom2.location == (0, 0, -1.5)
         atom2.rotate(math.pi * 1.5, "y")
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
         atom2.move_to(10, 10, 10)
-        self.assertEqual(atom2.location, (10, 10, 10))
+        assert atom2.location == (10, 10, 10)
         atom2.move_to(1.5, 0, 0)
 
         # Bond atoms
@@ -93,31 +92,31 @@ class DeNovoStructureTests(TestCase):
         atom2.bond(atom3)
         atom2.bond(atom4)
         atom4.bond(atom5)
-        self.assertEqual(atom1.bonded_atoms, {atom2})
-        self.assertEqual(atom2.bonded_atoms, {atom1, atom3, atom4})
-        self.assertEqual(atom3.bonded_atoms, {atom2})
-        self.assertEqual(atom4.bonded_atoms, {atom2, atom5})
-        self.assertEqual(atom5.bonded_atoms, {atom4})
+        assert atom1.bonded_atoms == {atom2}
+        assert atom2.bonded_atoms == {atom1, atom3, atom4}
+        assert atom3.bonded_atoms == {atom2}
+        assert atom4.bonded_atoms == {atom2, atom5}
+        assert atom5.bonded_atoms == {atom4}
 
         # Check can copy atom
         copy = atom2.copy()
-        self.assertEqual(copy.element, "C")
-        self.assertEqual(copy.location, (1.5, 0, 0))
-        self.assertEqual(copy.name, "CA")
-        self.assertEqual(copy.id, 2)
-        self.assertEqual(copy.charge, 0)
-        self.assertEqual(copy.charge, 0)
-        self.assertEqual(copy.bvalue, 0.4)
-        self.assertEqual(copy.anisotropy, [0] * 6)
-        self.assertIsNone(copy.het)
-        self.assertIsNone(copy.chain)
-        self.assertIsNone(copy.model)
-        self.assertEqual(copy.bonded_atoms, set())
-        self.assertEqual(atom2, copy)
+        assert copy.element == "C"
+        assert copy.location == (1.5, 0, 0)
+        assert copy.name == "CA"
+        assert copy.id == 2
+        assert copy.charge == 0
+        assert copy.charge == 0
+        assert copy.bvalue == 0.4
+        assert copy.anisotropy == [0] * 6
+        assert copy.het is None
+        assert copy.chain is None
+        assert copy.model is None
+        assert copy.bonded_atoms == set()
+        assert atom2 == copy
 
         # Can copy atom with new ID
         copy = atom2.copy(id=10000)
-        self.assertEqual(copy.id, 10000)
+        assert copy.id == 10000
 
         # Create residue
         res1 = Residue(
@@ -125,92 +124,91 @@ class DeNovoStructureTests(TestCase):
         )
 
         # Check basic residue properties
-        self.assertEqual(res1.id, "A5")
-        self.assertEqual(res1.name, "AL")
-        self.assertEqual(res1.code, "X")
+        assert res1.id == "A5"
+        assert res1.name == "AL"
+        assert res1.code == "X"
         res1.name = "ALA"
-        self.assertEqual(res1.name, "ALA")
-        self.assertEqual(res1.code, "A")
-        self.assertIsNone(res1.next)
-        self.assertIsNone(res1.previous)
-        self.assertIsNone(res1.chain)
+        assert res1.name == "ALA"
+        assert res1.code == "A"
+        assert res1.next is None
+        assert res1.previous is None
+        assert res1.chain is None
 
         # Check residue and atoms
         for atom in (atom1, atom2, atom3, atom4, atom5):
-            self.assertIs(atom.het, res1)
-        self.assertTrue(atom1.is_backbone)
-        self.assertTrue(atom3.is_side_chain)
-        self.assertEqual(res1.atoms(), {atom1, atom2, atom3, atom4, atom5})
-        self.assertEqual(res1.atoms(element="C"), {atom2, atom3, atom4})
-        self.assertEqual(res1.atoms(name="O"), {atom5})
-        self.assertEqual(res1.atoms(is_backbone=True), {atom1, atom2, atom4, atom5})
-        self.assertEqual(res1.atoms(mass__gt=13), {atom1, atom5})
-        self.assertEqual(res1.atoms(name__regex="N|O"), {atom1, atom5})
+            assert atom.het is res1
+        assert atom1.is_backbone
+        assert atom3.is_side_chain
+        assert res1.atoms() == {atom1, atom2, atom3, atom4, atom5}
+        assert res1.atoms(element="C") == {atom2, atom3, atom4}
+        assert res1.atoms(name="O") == {atom5}
+        assert res1.atoms(is_backbone=True) == {atom1, atom2, atom4, atom5}
+        assert res1.atoms(mass__gt=13) == {atom1, atom5}
+        assert res1.atoms(name__regex="N|O") == {atom1, atom5}
 
         # Check residue is container
-        self.assertIn(atom1, res1)
-        self.assertIn(copy, res1)
+        assert atom1 in res1
+        assert copy in res1
 
         # Check residue calculated properties
-        self.assertEqual(res1.code, "A")
-        self.assertEqual(res1.full_name, "alanine")
-        self.assertIsNone(res1.model)
-        self.assertAlmostEqual(res1.mass, 66, delta=0.05)
-        self.assertEqual(res1.charge, 0.5)
-        self.assertEqual(res1.formula, {"C": 3, "O": 1, "N": 1})
-        self.assertAlmostEqual(res1.center_of_mass[0], 1.818, delta=0.001)
-        self.assertAlmostEqual(res1.center_of_mass[1], -0.091, delta=0.001)
-        self.assertEqual(res1.center_of_mass[2], 0)
-        self.assertAlmostEqual(res1.radius_of_gyration, 1.473, delta=0.001)
+        assert res1.code == "A"
+        assert res1.full_name == "alanine"
+        assert res1.model is None
+        assert res1.mass == pytest.approx(66, abs=0.05)
+        assert res1.charge == 0.5
+        assert res1.formula == {"C": 3, "O": 1, "N": 1}
+        assert res1.center_of_mass[0] == pytest.approx(1.818, abs=0.001)
+        assert res1.center_of_mass[1] == pytest.approx(-0.091, abs=0.001)
+        assert res1.center_of_mass[2] == 0
+        assert res1.radius_of_gyration == pytest.approx(1.473, abs=0.001)
 
         # Check residue safe methods
-        self.assertEqual(len(tuple(res1.pairwise_atoms())), 10)
-        self.assertEqual(res1.nearby_hets(10), set())
-        self.assertEqual(res1.nearby_atoms(10), set())
-        self.assertEqual(res1.nearby_chains(10), set())
-        self.assertEqual(
-         tuple(res1.create_grid(size=3)),
-         ((0, -3, 0), (0, 0, 0), (0, 3, 0), (3, -3, 0), (3, 0, 0), (3, 3, 0))
+        assert len(tuple(res1.pairwise_atoms())) == 10
+        assert res1.nearby_hets(10) == set()
+        assert res1.nearby_atoms(10) == set()
+        assert res1.nearby_chains(10) == set()
+        assert tuple(res1.create_grid(size=3)) == (
+         (0, -3, 0), (0, 0, 0), (0, 3, 0), (3, -3, 0), (3, 0, 0), (3, 3, 0)
         )
-        self.assertEqual(res1.atoms_in_sphere((1.5, 0, 0), 1.5), {atom2, atom1, atom3, atom4})
-        self.assertEqual(res1.atoms_in_sphere((1.5, 0, 0), 1.5, element="C"), {atom2, atom3, atom4})
+        assert res1.atoms_in_sphere((1.5, 0, 0), 1.5) == {atom2, atom1, atom3, atom4}
+        assert res1.atoms_in_sphere((1.5, 0, 0), 1.5, element="C") == {atom2, atom3, atom4}
         res1.check_ids()
-        self.assertFalse(res1.helix)
-        self.assertFalse(res1.strand)
+        assert not res1.helix
+        assert not res1.strand
 
         # Check residue side effect methods
         res1.translate(0, 0, 1)
-        self.assertEqual(atom2.location, (1.5, 0, 1))
+        assert atom2.location == (1.5, 0, 1)
         res1.translate(0, 0, -1)
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
         res1.transform([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-        self.assertEqual(atom2.location, (-1.5, 0, 0))
+        assert atom2.location == (-1.5, 0, 0)
         res1.transform([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
         res1.rotate(math.pi / 2, "y")
-        self.assertEqual(atom2.location, (0, 0, -1.5))
+        assert atom2.location == (0, 0, -1.5)
         res1.rotate(math.pi * 1.5, "y")
-        self.assertEqual(atom2.location, (1.5, 0, 0))
+        assert atom2.location == (1.5, 0, 0)
 
         # Can make copy of residue
         res_copy = res1.copy()
-        self.assertEqual(res1, res_copy)
-        self.assertEqual(res_copy.id, "A5")
-        self.assertEqual(res_copy.name, "ALA")
-        self.assertEqual(res1.pairing_with(res_copy), {
+        assert res1 == res_copy
+        assert res_copy.id == "A5"
+        assert res_copy.name == "ALA"
+        assert res1.pairing_with(res_copy) == {
          atom1: res_copy.atom(1), atom2: res_copy.atom(2),
          atom3: res_copy.atom(3), atom4: res_copy.atom(4),
          atom5: res_copy.atom(5)
-        })
-        self.assertEqual(len(res1.atoms() | res_copy.atoms()), 10)
-        self.assertEqual(res1.rmsd_with(res_copy), 0)
+        }
+        assert len(res1.atoms() | res_copy.atoms()) == 10
+        assert res1.rmsd_with(res_copy) == 0
         res_copy.atom(1).translate(1)
-        self.assertAlmostEqual(res1.rmsd_with(res_copy), 0.4, delta=0.001)
+        assert res1.rmsd_with(res_copy) == pytest.approx(0.4, abs=0.001)
 
         # Can make copy of residue with new IDs
         res_copy = res1.copy(id="C5", atom_ids=lambda i: i * 100)
-        self.assertEqual(res_copy.id, "C5")
-        self.assertEqual({a.id for a in res_copy.atoms()}, {100, 200, 300, 400, 500})
+        assert res_copy.id == "C5"
+        assert {a.id for a in res_copy.atoms()} == {100, 200, 300, 400, 500}
 
         # Make more residues
         atom6 = Atom("N", 4.5, 0, 0, 6, "N", 0, 0.5, [0] * 6)
@@ -249,69 +247,69 @@ class DeNovoStructureTests(TestCase):
         # Connect residues
         res1.next = res2
         res3.previous = res2
-        self.assertIs(res1.next, res2)
-        self.assertIs(res2.next, res3)
-        self.assertIs(res3.previous, res2)
-        self.assertIs(res2.previous, res1)
+        assert res1.next is res2
+        assert res2.next is res3
+        assert res3.previous is res2
+        assert res2.previous is res1
 
         # Create chain
         chain1 = Chain(
          res1, res2, res3, id="A", sequence="MACSD", helices=((res1, res2),), strands=((res3,),)
         )
-        self.assertEqual(chain1.id, "A")
-        self.assertEqual(chain1.internal_id, "A")
-        self.assertIsNone(chain1.name)
-        self.assertIsNone(chain1.model)
+        assert chain1.id == "A"
+        assert chain1.internal_id == "A"
+        assert chain1.name is None
+        assert chain1.model is None
 
         # Chain properties
-        self.assertEqual(chain1.sequence, "MACSD")
+        assert chain1.sequence == "MACSD"
         chain1.sequence = "MACSDA"
-        self.assertEqual(chain1.sequence, "MACSDA")
-        self.assertEqual(chain1.present_sequence, "ACS")
-        self.assertEqual(chain1.helices[0], (res1, res2))
-        self.assertEqual(chain1.strands[0], (res3,))
+        assert chain1.sequence == "MACSDA"
+        assert chain1.present_sequence == "ACS"
+        assert chain1.helices[0] == (res1, res2)
+        assert chain1.strands[0] == (res3,)
 
         # Check chain residues and atoms
-        self.assertEqual(chain1.residues(), (res1, res2, res3))
-        self.assertEqual(chain1.residues(mass__gt=80), (res2, res3))
-        self.assertEqual(chain1.residues(mass__lt=98.1), (res1, res3))
-        self.assertEqual(chain1.atoms(), {
+        assert chain1.residues() == (res1, res2, res3)
+        assert chain1.residues(mass__gt=80) == (res2, res3)
+        assert chain1.residues(mass__lt=98.1) == (res1, res3)
+        assert chain1.atoms() == {
          atom1, atom2, atom3, atom4, atom5, atom6, atom7, atom8, atom9, atom10,
          atom11, atom12, atom13, atom14, atom15, atom16, atom17, atom18
-        })
-        self.assertEqual(chain1.atoms(het__name="ALA"), {
+        }
+        assert chain1.atoms(het__name="ALA") == {
          atom1, atom2, atom3, atom4, atom5
-        })
-        self.assertEqual(chain1.atoms(het__name="CYS"), {
+        }
+        assert chain1.atoms(het__name="CYS") == {
          atom6, atom7, atom8, atom9, atom10, atom11
-        })
-        self.assertEqual(chain1.atoms(het__name__regex="CYS|ALA"), {
+        }
+        assert chain1.atoms(het__name__regex="CYS|ALA") == {
          atom1, atom2, atom3, atom4, atom5, atom6, atom7, atom8, atom9, atom10, atom11
-        })
-        self.assertTrue(res1.helix)
-        self.assertFalse(res1.strand)
-        self.assertTrue(res2.helix)
-        self.assertFalse(res2.strand)
-        self.assertFalse(res3.helix)
-        self.assertTrue(res3.strand)
+        }
+        assert res1.helix
+        assert not res1.strand
+        assert res2.helix
+        assert not res2.strand
+        assert not res3.helix
+        assert res3.strand
 
         # Check chain magic methods
-        self.assertEqual(chain1.length, 3)
-        self.assertIs(chain1[0], res1)
+        assert chain1.length == 3
+        assert chain1[0] is res1
         for res in chain1:
-            self.assertIn(res, (res1, res2, res3))
-        self.assertIn(res1, chain1)
-        self.assertIn(atom10, chain1)
+            assert res in (res1, res2, res3)
+        assert res1 in chain1
+        assert atom10 in chain1
 
         # Check chain ligands and atoms
-        self.assertEqual(chain1.ligands(), set())
-        self.assertEqual(
-         chain1.atoms(element__regex="O|S"),
-         {atom5, atom9, atom11, atom15, atom17, atom18}
+        assert chain1.ligands() == set()
+        assert (
+         chain1.atoms(element__regex="O|S")
+         == {atom5, atom9, atom11, atom15, atom17, atom18}
         )
-        self.assertEqual(
-         chain1.atoms(het__name="CYS"),
-         {atom6, atom7, atom8, atom9, atom10, atom11}
+        assert (
+         chain1.atoms(het__name="CYS")
+         == {atom6, atom7, atom8, atom9, atom10, atom11}
         )
 
         # Make copy of chain
@@ -320,21 +318,21 @@ class DeNovoStructureTests(TestCase):
          residue_ids=lambda i: i.replace("A", "B"),
          atom_ids=lambda i: i * 100
         )
-        self.assertEqual(chain1, chain2)
-        self.assertEqual(chain2.id, "B")
-        self.assertEqual(chain2.internal_id, "B")
-        self.assertEqual([res.id for res in chain2], ["B5", "B5B", "B6"])
-        self.assertEqual({a.id for a in chain2.atoms()}, set([x * 100 for x in range(1, 19)]))
-        self.assertIs(chain2[0].next, chain2[1])
-        self.assertIs(chain2[2].previous, chain2[1])
-        self.assertEqual(chain2.helices, ((chain2[0], chain2[1]),))
-        self.assertEqual(chain2.strands, ((chain2[2],),))
+        assert chain1 == chain2
+        assert chain2.id == "B"
+        assert chain2.internal_id == "B"
+        assert [res.id for res in chain2] == ["B5", "B5B", "B6"]
+        assert {a.id for a in chain2.atoms()} == set([x * 100 for x in range(1, 19)])
+        assert chain2[0].next is chain2[1]
+        assert chain2[2].previous is chain2[1]
+        assert chain2.helices == ((chain2[0], chain2[1]),)
+        assert chain2.strands == ((chain2[2],),)
 
         # Move chain into place
         chain2.rotate(math.pi, "x")
         chain2.rotate(math.pi, "y")
         chain2.translate(12, -10.5)
-        self.assertEqual(chain1.rmsd_with(chain2), 0)
+        assert chain1.rmsd_with(chain2) == 0
 
         # Make ligand
         copper_atom = Atom("Cu", 6, -5.25, 2, 100, "Cu", 2, 0, [0] * 6)
@@ -343,110 +341,110 @@ class DeNovoStructureTests(TestCase):
         )
 
         # Check ligand properties
-        self.assertEqual(copper.id, "A100")
-        self.assertEqual(copper.name, "CU")
-        self.assertEqual(copper.full_name, "copper")
+        assert copper.id == "A100"
+        assert copper.name == "CU"
+        assert copper.full_name == "copper"
         copper.full_name = None
-        self.assertEqual(copper.full_name, "CU")
-        self.assertEqual(copper.internal_id, "M")
-        self.assertIs(copper.chain, chain1)
-        self.assertIsNone(copper.model)
-        self.assertEqual(copper.atom(), copper_atom)
-        self.assertIn(copper_atom, copper)
-        self.assertFalse(copper.is_water)
+        assert copper.full_name == "CU"
+        assert copper.internal_id == "M"
+        assert copper.chain is chain1
+        assert copper.model is None
+        assert copper.atom() == copper_atom
+        assert copper_atom in copper
+        assert not copper.is_water
 
         # Can make copy of ligand
         cu_copy = copper.copy()
-        self.assertEqual(copper, cu_copy)
-        self.assertEqual(cu_copy.id, "A100")
-        self.assertEqual(cu_copy.name, "CU")
-        self.assertEqual(len(cu_copy.atoms() | cu_copy.atoms()), 1)
-        self.assertFalse(cu_copy.is_water)
+        assert copper == cu_copy
+        assert cu_copy.id == "A100"
+        assert cu_copy.name == "CU"
+        assert len(cu_copy.atoms() | cu_copy.atoms()) == 1
+        assert not cu_copy.is_water
 
         # Can make copy of ligand with new IDs
         cu_copy = copper.copy(id="C100", atom_ids=lambda i: i * 100)
-        self.assertEqual(cu_copy.id, "C100")
-        self.assertEqual(cu_copy.atom().id, 10000)
+        assert cu_copy.id == "C100"
+        assert cu_copy.atom().id == 10000
 
         # Create waters
         hoh1 = Ligand(
          Atom("O", 3, -3, 3, 500, "O", 0, 0, [0] * 6),
          id="A1000", name="HOH", water=True
         )
-        self.assertTrue(hoh1.is_water)
+        assert hoh1.is_water
         hoh2 = Ligand(
          Atom("O", 3, -9, -3, 500, "O", 0, 0, [0] * 6),
          id="B1000", name="HOH", water=True
         )
-        self.assertTrue(hoh2.is_water)
+        assert hoh2.is_water
 
         # Create model
         model = Model(chain1, chain2, copper, hoh1, hoh2)
         
         # Model properties
-        self.assertIsNone(model.file)
-        self.assertEqual(model.chains(), {chain1, chain2})
-        self.assertEqual(model.ligands(), {copper})
-        self.assertEqual(chain1.ligands(), {copper})
-        self.assertEqual(model.waters(), {hoh1, hoh2})
-        self.assertEqual(model.molecules(), {chain1, chain2, copper, hoh1, hoh2})
-        self.assertEqual(model.residues(), set(chain1.residues() + chain2.residues()))
-        self.assertEqual(model.residues(name="ALA"), {chain1[0], chain2[0]})
-        self.assertEqual(model.ligand(), copper)
-        self.assertEqual(model.atom(1), atom1)
-        self.assertEqual(model.atom(name="N", het__name="ALA", chain__id="A"), atom1)
+        assert model.file is None
+        assert model.chains() == {chain1, chain2}
+        assert model.ligands() == {copper}
+        assert chain1.ligands() == {copper}
+        assert model.waters() == {hoh1, hoh2}
+        assert model.molecules() == {chain1, chain2, copper, hoh1, hoh2}
+        assert model.residues() == set(chain1.residues() + chain2.residues())
+        assert model.residues(name="ALA") == {chain1[0], chain2[0]}
+        assert model.ligand() == copper
+        assert model.atom(1) == atom1
+        assert model.atom(name="N", het__name="ALA", chain__id="A") == atom1
 
         # Everything points upwards correctly
-        self.assertIs(atom1.model, model)
-        self.assertIs(res1.model, model)
-        self.assertIs(chain1.model, model)
-        self.assertIs(copper.model, model)
+        assert atom1.model is model
+        assert res1.model is model
+        assert chain1.model is model
+        assert copper.model is model
 
         # Now that atoms are in a model, find nearby things
-        self.assertEqual(atom2.nearby_atoms(1.5), {atom1, atom3, atom4})
-        self.assertEqual(atom4.nearby_atoms(1.5), {atom2, atom5, atom6})
-        self.assertEqual(atom4.nearby_atoms(1.5, het__name="CYS"), {atom6})
-        self.assertEqual(atom4.nearby_hets(1.5), {res2})
-        self.assertEqual(atom4.nearby_hets(9), {res2, res3, chain2[1], copper, hoh1})
-        self.assertEqual(atom4.nearby_hets(9, ligands=False), {res2, res3, chain2[1]})
-        self.assertEqual(atom4.nearby_hets(9, residues=False), {copper, hoh1})
-        self.assertEqual(atom4.nearby_hets(9, residues=False, het__is_water=False), {copper})
-        self.assertEqual(atom4.nearby_chains(9), {chain2})
-        self.assertEqual(atom4.nearby_chains(9, chain__id="A"), set())
-        self.assertEqual(res2.nearby_hets(3), {res1, res3})
-        self.assertEqual(res2.nearby_hets(6), {res1, res3, hoh1, copper, chain2[1]})
-        self.assertEqual(res2.nearby_hets(6, ligands=False), {res1, res3, chain2[1]})
-        self.assertEqual(copper.nearby_chains(5), {chain2})
-        self.assertEqual(chain2.nearby_chains(5), {chain1})
+        assert atom2.nearby_atoms(1.5) == {atom1, atom3, atom4}
+        assert atom4.nearby_atoms(1.5) == {atom2, atom5, atom6}
+        assert atom4.nearby_atoms(1.5, het__name="CYS") == {atom6}
+        assert atom4.nearby_hets(1.5) == {res2}
+        assert atom4.nearby_hets(9) == {res2, res3, chain2[1], copper, hoh1}
+        assert atom4.nearby_hets(9, ligands=False) == {res2, res3, chain2[1]}
+        assert atom4.nearby_hets(9, residues=False) == {copper, hoh1}
+        assert atom4.nearby_hets(9, residues=False, het__is_water=False) == {copper}
+        assert atom4.nearby_chains(9) == {chain2}
+        assert atom4.nearby_chains(9, chain__id="A") == set()
+        assert res2.nearby_hets(3) == {res1, res3}
+        assert res2.nearby_hets(6) == {res1, res3, hoh1, copper, chain2[1]}
+        assert res2.nearby_hets(6, ligands=False) == {res1, res3, chain2[1]}
+        assert copper.nearby_chains(5) == {chain2}
+        assert chain2.nearby_chains(5) == {chain1}
 
         # Dehydrate model
         model.dehydrate()
-        self.assertEqual(model.waters(), set())
-        self.assertEqual(model.ligands(), {copper})
-        self.assertEqual(model.chains(), {chain1, chain2})
+        assert model.waters() == set()
+        assert model.ligands() == {copper}
+        assert model.chains() == {chain1, chain2}
 
 
 
-class FileReadingTests(TestCase):
+class TestFileReading:
 
     def test_1lol(self):
         for e in ["cif", "mmtf", "pdb", "pdb.gz", "cif.gz"]:
             f = io.open("tests/io/integration/files/1lol." + e)
-            self.assertEqual(f.filetype, e.replace(".gz", ""))
-            self.assertEqual(f.code, "1LOL")
+            assert f.filetype == e.replace(".gz", "")
+            assert f.code == "1LOL"
             if e.startswith("pdb"):
-                self.assertEqual(
-                 f.title, "CRYSTAL STRUCTURE OF OROTIDINE MONOPHOSPHATE DECARBOXYLASE COMPLEX WITH XMP"
+                assert (
+                 f.title == "CRYSTAL STRUCTURE OF OROTIDINE MONOPHOSPHATE DECARBOXYLASE COMPLEX WITH XMP"
                 )
             else:
-                self.assertEqual(
-                 f.title, "Crystal structure of orotidine monophosphate decarboxylase complex with XMP"
+                assert (
+                 f.title == "Crystal structure of orotidine monophosphate decarboxylase complex with XMP"
                 )
-            self.assertEqual(f.deposition_date, date(2002, 5, 6))
-            self.assertEqual(f.classification, None if e == "mmtf" else "LYASE")
-            self.assertEqual(f.keywords, [] if e == "mmtf" else ["TIM BARREL", "LYASE"] if e.startswith("pdb") else ["TIM barrel", "LYASE"])
-            self.assertEqual(f.authors, [] if e == "mmtf" else ["N.WU", "E.F.PAI"] if e.startswith("pdb") else ["Wu, N.", "Pai, E.F."])
-            self.assertEqual(f.technique, "X-RAY DIFFRACTION")
+            assert f.deposition_date == date(2002, 5, 6)
+            assert f.classification == (None if e == "mmtf" else "LYASE")
+            assert f.keywords == ([] if e == "mmtf" else ["TIM BARREL", "LYASE"] if e.startswith("pdb") else ["TIM barrel", "LYASE"])
+            assert f.authors == ([] if e == "mmtf" else ["N.WU", "E.F.PAI"] if e.startswith("pdb") else ["Wu, N.", "Pai, E.F."])
+            assert f.technique == "X-RAY DIFFRACTION"
             missing_residues = [{"id": id, "name": name} for id, name in zip([
              "A.1", "A.2", "A.3", "A.4", "A.5", "A.6", "A.7", "A.8", "A.9", "A.10",
              "A.182", "A.183", "A.184", "A.185", "A.186", "A.187", "A.188", "A.189",
@@ -460,22 +458,22 @@ class FileReadingTests(TestCase):
              "VAL", "ASP", "VAL", "MET", "ASP", "VAL", "GLY", "ALA", "GLN", "GLY"
             ])]
             if e.startswith("pdb"):
-                self.assertEqual(f.source_organism, "METHANOTHERMOBACTER THERMAUTOTROPHICUS STR. DELTA H")
-                self.assertEqual(f.expression_system, "ESCHERICHIA COLI")
-                self.assertEqual(f.missing_residues, missing_residues)
+                assert f.source_organism == "METHANOTHERMOBACTER THERMAUTOTROPHICUS STR. DELTA H"
+                assert f.expression_system == "ESCHERICHIA COLI"
+                assert f.missing_residues == missing_residues
             else:
-                self.assertEqual(
-                 f.source_organism,
-                 None if e == "mmtf" else "Methanothermobacter thermautotrophicus str. Delta H"
+                assert (
+                 f.source_organism
+                 == (None if e == "mmtf" else "Methanothermobacter thermautotrophicus str. Delta H")
                 )
-                self.assertEqual(
-                 f.expression_system, None if e == "mmtf" else "Escherichia coli"
+                assert (
+                 f.expression_system == (None if e == "mmtf" else "Escherichia coli")
                 )
-                self.assertEqual(f.missing_residues, [] if e == "mmtf" else missing_residues)
-            self.assertEqual(f.resolution, 1.9)
-            self.assertEqual(f.rvalue, 0.193)
-            self.assertEqual(f.rfree, 0.229)
-            self.assertEqual(f.assemblies, [{
+                assert f.missing_residues == ([] if e == "mmtf" else missing_residues)
+            assert f.resolution == 1.9
+            assert f.rvalue == 0.193
+            assert f.rfree == 0.229
+            assert f.assemblies == [{
              "id": 1,
              "software": None if e == "mmtf" else "PISA",
              "delta_energy": None if e == "mmtf" else -31.0,
@@ -486,200 +484,198 @@ class FileReadingTests(TestCase):
               "matrix": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
               "vector": [0.0, 0.0, 0.0]
              }]
-            }])
+            }]
 
-            self.assertEqual(len(f.models), 1)
+            assert len(f.models) == 1
             model = f.model
-            self.assertEqual(len(model.chains()), 2)
-            self.assertIsInstance(model.chains(), set)
-            self.assertEqual(len(model.ligands()), 4)
-            self.assertIsInstance(model.ligands(), set)
-            self.assertEqual(len(model.waters()), 180)
-            self.assertIsInstance(model.waters(), set)
-            self.assertEqual(len(model.molecules()), 186)
-            self.assertIsInstance(model.molecules(), set)
-            self.assertEqual(len(model.residues()), 418)
-            self.assertIsInstance(model.residues(), set)
-            self.assertEqual(len(model.atoms()), 3431)
-            self.assertIsInstance(model.atoms(), set)
-            self.assertEqual(len(model.chains(length__gt=200)), 2)
-            self.assertEqual(len(model.chains(length__gt=210)), 1)
-            self.assertEqual(len(model.ligands(name="XMP")), 2)
-            self.assertEqual(len(model.residues(name="VAL")), 28)
-            self.assertEqual(len(model.residues(name="CYS")), 6)
-            self.assertEqual(len(model.residues(name__regex="CYS|VAL")), 34)
-            self.assertAlmostEqual(
-             model.mass, 46018.5, delta=0.005
-            )
+            assert len(model.chains()) == 2
+            assert isinstance(model.chains(), set)
+            assert len(model.ligands()) == 4
+            assert isinstance(model.ligands(), set)
+            assert len(model.waters()) == 180
+            assert isinstance(model.waters(), set)
+            assert len(model.molecules()) == 186
+            assert isinstance(model.molecules(), set)
+            assert len(model.residues()) == 418
+            assert isinstance(model.residues(), set)
+            assert len(model.atoms()) == 3431
+            assert isinstance(model.atoms(), set)
+            assert len(model.chains(length__gt=200)) == 2
+            assert len(model.chains(length__gt=210)) == 1
+            assert len(model.ligands(name="XMP")) == 2
+            assert len(model.residues(name="VAL")) == 28
+            assert len(model.residues(name="CYS")) == 6
+            assert len(model.residues(name__regex="CYS|VAL")) == 34
+            assert model.mass == pytest.approx(46018.5, abs=0.005)
 
             chaina = model.chain("A")
             chainb = model.chain(id="B")
-            self.assertIs(chaina.model, model)
-            self.assertIs(chainb.model, model)
-            self.assertEqual(chaina.id, "A")
-            self.assertEqual(chaina.length, 204)
-            self.assertEqual(chainb.length, 214)
-            self.assertTrue(chaina.sequence.startswith("LRSRRVDVMDVMNRLILAMDL"))
-            self.assertTrue(chaina.sequence.endswith("LADNPAAAAAGIIESIKDLLIPE"))
-            self.assertTrue(chainb.sequence.startswith("LRSRRVDVMDVMNRLILAMDL"))
-            self.assertTrue(chainb.sequence.endswith("LADNPAAAAAGIIESIKDLLIPE"))
+            assert chaina.model is model
+            assert chainb.model is model
+            assert chaina.id == "A"
+            assert chaina.length == 204
+            assert chainb.length == 214
+            assert chaina.sequence.startswith("LRSRRVDVMDVMNRLILAMDL")
+            assert chaina.sequence.endswith("LADNPAAAAAGIIESIKDLLIPE")
+            assert chainb.sequence.startswith("LRSRRVDVMDVMNRLILAMDL")
+            assert chainb.sequence.endswith("LADNPAAAAAGIIESIKDLLIPE")
             for res in chaina:
-                self.assertIn(res, chaina)
-            self.assertEqual(len(chaina.residues()), 204)
-            self.assertIsInstance(chaina.residues(), tuple)
-            self.assertEqual(len(chaina.ligands()), 2)
-            self.assertIsInstance(chaina.ligands(), set)
-            self.assertEqual(len(chaina.atoms()), 1557)
-            self.assertIsInstance(chaina.atoms(), set)
-            self.assertEqual(len(chainb.atoms()), 1634)
-            self.assertIsInstance(chainb.atoms(), set)
+                assert res in chaina
+            assert len(chaina.residues()) == 204
+            assert isinstance(chaina.residues(), tuple)
+            assert len(chaina.ligands()) == 2
+            assert isinstance(chaina.ligands(), set)
+            assert len(chaina.atoms()) == 1557
+            assert isinstance(chaina.atoms(), set)
+            assert len(chainb.atoms()) == 1634
+            assert isinstance(chainb.atoms(), set)
             res = chaina.residue("A.13")
-            self.assertTrue(res.helix)
-            self.assertFalse(res.strand)
+            assert res.helix
+            assert not res.strand
             res = chaina.residue("A.15")
-            self.assertFalse(res.helix)
-            self.assertTrue(res.strand)
-            self.assertIs(res.chain, chaina)
-            self.assertIs(res.model, model)
-            self.assertEqual(res.name, "LEU")
-            self.assertEqual(res.code, "L")
-            self.assertEqual(res.full_name, "leucine")
-            self.assertEqual(len(res.atoms()), 8)
-            self.assertIsInstance(chaina.atoms(), set)
-            self.assertEqual(len(res.atoms(element="C")), 6)
-            self.assertEqual(len(res.atoms(element__regex="C|O")), 7)
-            self.assertEqual(len(res.atoms(name__regex="^CD")), 2)
-            self.assertIs(chaina[0], chaina.residue("A.11"))
-            self.assertIs(res.next, chaina[5])
-            self.assertIn(chaina.residue(name="GLN"), [chaina.residue("A.136"), chaina.residue("A.173")])
+            assert not res.helix
+            assert res.strand
+            assert res.chain is chaina
+            assert res.model is model
+            assert res.name == "LEU"
+            assert res.code == "L"
+            assert res.full_name == "leucine"
+            assert len(res.atoms()) == 8
+            assert isinstance(chaina.atoms(), set)
+            assert len(res.atoms(element="C")) == 6
+            assert len(res.atoms(element__regex="C|O")) == 7
+            assert len(res.atoms(name__regex="^CD")) == 2
+            assert chaina[0] is chaina.residue("A.11")
+            assert res.next is chaina[5]
+            assert chaina.residue(name="GLN") in [chaina.residue("A.136"), chaina.residue("A.173")]
 
             # Source information
             if e == "pdb":
                 for chain in (chaina, chainb):
-                    self.assertEqual(
-                        chain.information["organism_scientific"],
-                        "METHANOTHERMOBACTER THERMAUTOTROPHICUS STR. DELTA H",
+                    assert (
+                        chain.information["organism_scientific"]
+                        == "METHANOTHERMOBACTER THERMAUTOTROPHICUS STR. DELTA H"
                     )
-                    self.assertEqual(
-                        chain.information["molecule"],
-                        "OROTIDINE 5'-MONOPHOSPHATE DECARBOXYLASE",
+                    assert (
+                        chain.information["molecule"]
+                        == "OROTIDINE 5'-MONOPHOSPHATE DECARBOXYLASE"
                     )
-                    self.assertEqual(
-                        chain.information["engineered"],
-                        "YES",
+                    assert (
+                        chain.information["engineered"]
+                        == "YES"
                     )
 
             lig = model.ligand(name="XMP")
-            self.assertIs(lig.model, model)
-            self.assertEqual(len(lig.atoms()), 24)
-            self.assertEqual(lig.formula, {"C": 10, "O": 9, "N": 4, "P": 1})
-            self.assertEqual(lig.full_name, "XANTHOSINE-5'-MONOPHOSPHATE")
+            assert lig.model is model
+            assert len(lig.atoms()) == 24
+            assert lig.formula == {"C": 10, "O": 9, "N": 4, "P": 1}
+            assert lig.full_name == "XANTHOSINE-5'-MONOPHOSPHATE"
             lig = model.ligand("A.5001")
-            self.assertIs(lig.model, model)
-            self.assertIs(lig.chain, chaina)
-            self.assertEqual(len(lig.atoms()), 6)
-            self.assertEqual(lig.mass, 80.0416)
+            assert lig.model is model
+            assert lig.chain is chaina
+            assert len(lig.atoms()) == 6
+            assert lig.mass == 80.0416
             pairs = list(lig.pairwise_atoms())
-            self.assertEqual(len(pairs), 15)
+            assert len(pairs) == 15
             for pair in pairs:
                 pair = list(pair)
-                self.assertTrue(0 < pair[0].distance_to(pair[1]), 5)
+                assert 0 < pair[0].distance_to(pair[1]) < 5
             hoh = model.water("A.3005")
-            self.assertEqual(hoh.name, "HOH")
-            self.assertIs(lig.model, model)
-            self.assertIs(lig.chain, chaina)
+            assert hoh.name == "HOH"
+            assert lig.model is model
+            assert lig.chain is chaina
             lig1, lig2 = model.ligands(name="XMP")
-            self.assertAlmostEqual(lig1.rmsd_with(lig2), 0.133, delta=0.001)
-            self.assertAlmostEqual(lig2.rmsd_with(lig1), 0.133, delta=0.001)
+            assert lig1.rmsd_with(lig2) == pytest.approx(0.133, abs=0.001)
+            assert lig2.rmsd_with(lig1) == pytest.approx(0.133, abs=0.001)
 
             atom = model.atom(934)
-            self.assertEqual(atom.anisotropy, [0, 0, 0, 0, 0, 0])
-            self.assertEqual(atom.element, "C")
-            self.assertEqual(atom.name, "CA")
-            self.assertEqual(atom.location, (4.534, 53.864, 43.326))
-            self.assertEqual(atom.bvalue, 17.14)
-            self.assertEqual(atom.charge, 0)
-            self.assertAlmostEqual(atom.mass, 12, delta=0.1)
-            self.assertEqual(atom.atomic_number, 6)
-            self.assertIs(atom.chain, chaina)
-            self.assertIs(atom.model, model)
-            self.assertIs(atom.het, model.residue("A.131"))
+            assert atom.anisotropy == [0, 0, 0, 0, 0, 0]
+            assert atom.element == "C"
+            assert atom.name == "CA"
+            assert atom.location == (4.534, 53.864, 43.326)
+            assert atom.bvalue == 17.14
+            assert atom.charge == 0
+            assert atom.mass == pytest.approx(12, abs=0.1)
+            assert atom.atomic_number == 6
+            assert atom.chain is chaina
+            assert atom.model is model
+            assert atom.het is model.residue("A.131")
 
-            self.assertEqual(model.molecule("A"), chaina)
-            self.assertEqual(model.molecule("A.5001"), lig)
-            self.assertEqual(model.molecule("A.3005"), hoh)
-            self.assertEqual(len(model.molecules(mass__gt=18)), 6)
-            self.assertEqual(len(model.molecules(mass__gt=90)), 4)
-            self.assertEqual(len(model.molecules(mass__gt=1000)), 2)
-            self.assertEqual(len(model.molecules(mass__gt=90, mass__lt=1000)), 2)
+            assert model.molecule("A") == chaina
+            assert model.molecule("A.5001") == lig
+            assert model.molecule("A.3005") == hoh
+            assert len(model.molecules(mass__gt=18)) == 6
+            assert len(model.molecules(mass__gt=90)) == 4
+            assert len(model.molecules(mass__gt=1000)) == 2
+            assert len(model.molecules(mass__gt=90, mass__lt=1000)) == 2
 
             for optimise in [False, True]:
                 if optimise:
                     model.optimise_distances()
                 atom = model.atom(1587 if e.startswith("pdb") else 1586)
                 four_angstrom = atom.nearby_atoms(cutoff=4)
-                self.assertEqual(len(four_angstrom), 10)
-                self.assertEqual(
-                sorted([atom.id for atom in four_angstrom]),
-                [n - (not e.startswith("pdb")) for n in [1576, 1582, 1583, 1584, 1586, 1588, 1589, 1590, 1591, 2957]]
+                assert len(four_angstrom) == 10
+                assert (
+                sorted([atom.id for atom in four_angstrom])
+                == [n - (not e.startswith("pdb")) for n in [1576, 1582, 1583, 1584, 1586, 1588, 1589, 1590, 1591, 2957]]
                 )
-                self.assertEqual(len(atom.nearby_atoms(cutoff=4, element="O")), 1)
+                assert len(atom.nearby_atoms(cutoff=4, element="O")) == 1
                 four_angstrom = model.atoms_in_sphere(atom.location, 4)
-                self.assertEqual(len(four_angstrom), 11)
-                self.assertEqual(
-                sorted([atom.id for atom in four_angstrom]),
-                [n - (not e.startswith("pdb")) for n in [1576, 1582, 1583, 1584, 1586, 1587, 1588, 1589, 1590, 1591, 2957]]
+                assert len(four_angstrom) == 11
+                assert (
+                sorted([atom.id for atom in four_angstrom])
+                == [n - (not e.startswith("pdb")) for n in [1576, 1582, 1583, 1584, 1586, 1587, 1588, 1589, 1590, 1591, 2957]]
                 )
-                self.assertEqual(len(model.atoms_in_sphere(atom.location, 4, element="O")), 1)
-                self.assertEqual(len(model.atoms_in_sphere([10, 20, 30], 40)), 1281)
-                self.assertEqual(len(model.atoms_in_sphere([10, 20, 30], 41)), 1360)
-                self.assertEqual(len(model.atoms_in_sphere([10, 20, 30], 40, element="C")), 760)
-                self.assertEqual(len(model.atoms_in_sphere([10, 20, 30], 39, element="C")), 711)
+                assert len(model.atoms_in_sphere(atom.location, 4, element="O")) == 1
+                assert len(model.atoms_in_sphere([10, 20, 30], 40)) == 1281
+                assert len(model.atoms_in_sphere([10, 20, 30], 41)) == 1360
+                assert len(model.atoms_in_sphere([10, 20, 30], 40, element="C")) == 760
+                assert len(model.atoms_in_sphere([10, 20, 30], 39, element="C")) == 711
 
                 atom = model.atom(905)
-                self.assertEqual(len(atom.nearby_hets(5)), 9)
-                self.assertEqual(len(atom.nearby_hets(5, ligands=False)), 7)
-                self.assertEqual(len(atom.nearby_hets(5, het__is_water=False)), 8)
-                self.assertEqual(len(atom.nearby_hets(5, residues=False)), 2)
-                self.assertEqual(len(atom.nearby_hets(5, element="O")), 4)
+                assert len(atom.nearby_hets(5)) == 9
+                assert len(atom.nearby_hets(5, ligands=False)) == 7
+                assert len(atom.nearby_hets(5, het__is_water=False)) == 8
+                assert len(atom.nearby_hets(5, residues=False)) == 2
+                assert len(atom.nearby_hets(5, element="O")) == 4
 
             model.dehydrate()
-            self.assertEqual(model.waters(), set())
+            assert model.waters() == set()
 
 
     def test_5xme(self):
         for e in ["cif", "mmtf", "pdb"]:
             f = io.open("tests/io/integration/files/5xme." + e)
-            self.assertEqual(f.resolution, None)
+            assert f.resolution is None
             models = f.models
-            self.assertEqual(len(models), 10)
-            self.assertIs(f.model, f.models[0])
+            assert len(models) == 10
+            assert f.model is f.models[0]
             x_values = [
              33.969, 34.064, 37.369, 36.023, 35.245,
              35.835, 37.525, 35.062, 36.244, 37.677
             ]
             all_atoms = set()
             for x, model in zip(x_values, models):
-                self.assertEqual(len(model.atoms()), 1827)
+                assert len(model.atoms()) == 1827
                 all_atoms.update(model.atoms())
                 atom = model.chain()[0].atom(name="N")
-                self.assertEqual(atom.location[0], x)
-            self.assertEqual(len(all_atoms), 18270)
+                assert atom.location[0] == x
+            assert len(all_atoms) == 18270
 
             # Source information
             if e == "pdb":
                 chain = models[0].chain("A")
-                self.assertEqual(
-                    chain.information["organism_scientific"],
-                    "HOMO SAPIENS",
+                assert (
+                    chain.information["organism_scientific"]
+                    == "HOMO SAPIENS"
                 )
-                self.assertEqual(
-                    chain.information["molecule"],
-                    "TUMOR NECROSIS FACTOR RECEPTOR TYPE 1-ASSOCIATED DEATH DOMAIN PROTEIN",
+                assert (
+                    chain.information["molecule"]
+                    == "TUMOR NECROSIS FACTOR RECEPTOR TYPE 1-ASSOCIATED DEATH DOMAIN PROTEIN"
                 )
-                self.assertEqual(
-                    chain.information["engineered"],
-                    "YES",
+                assert (
+                    chain.information["engineered"]
+                    == "YES"
                 )
 
     def test_1cbn(self):
@@ -687,103 +683,103 @@ class FileReadingTests(TestCase):
             f = io.open("tests/io/integration/files/1cbn." + e)
             chain = f.model.chain()
             residue1, residue2, residue3 = chain[:3]
-            self.assertEqual(len(residue1.atoms()), 16)
-            self.assertEqual(len(residue2.atoms()), 14)
-            self.assertEqual(len(residue3.atoms()), 10)
+            assert len(residue1.atoms()) == 16
+            assert len(residue2.atoms()) == 14
+            assert len(residue3.atoms()) == 10
             for residue in chain[:3]:
                 for name in ["N", "C", "CA", "CB"]:
-                    self.assertEqual(len(residue.atoms(name=name)), 1)
+                    assert len(residue.atoms(name=name)) == 1
 
 
     def test_1xda(self):
         for e in ["cif", "mmtf", "pdb"]:
             f = io.open("tests/io/integration/files/1xda." + e)
-            self.assertEqual(len(f.model.atoms()), 1842)
-            self.assertEqual(len(f.model.atoms(is_metal=True)), 4)
-            self.assertEqual(len(f.model.atoms(is_metal=False)), 1838)
+            assert len(f.model.atoms()) == 1842
+            assert len(f.model.atoms(is_metal=True)) == 4
+            assert len(f.model.atoms(is_metal=False)) == 1838
 
             model = f.model
-            self.assertEqual(len(model.atoms()), 1842)
-            self.assertEqual(len(model.chains()), 8)
-            self.assertEqual(len(model.ligands()), 16)
+            assert len(model.atoms()) == 1842
+            assert len(model.chains()) == 8
+            assert len(model.ligands()) == 16
 
             model = f.generate_assembly(1)
-            self.assertEqual(len(model.chains()), 2)
-            self.assertEqual(set([c.id for c in model.chains()]), {"A", "B"})
-            self.assertEqual(len(model.ligands()), 4)
+            assert len(model.chains()) == 2
+            assert set([c.id for c in model.chains()]) == {"A", "B"}
+            assert len(model.ligands()) == 4
 
             model = f.generate_assembly(2)
-            self.assertEqual(len(model.chains()), 2)
-            self.assertEqual(set([c.id for c in model.chains()]), {"C", "D"})
-            self.assertEqual(len(model.ligands()), 4)
+            assert len(model.chains()) == 2
+            assert set([c.id for c in model.chains()]) == {"C", "D"}
+            assert len(model.ligands()) == 4
 
             model = f.generate_assembly(3)
-            self.assertEqual(len(model.chains()), 2)
-            self.assertEqual(set([c.id for c in model.chains()]), {"E", "F"})
-            self.assertEqual(len(model.ligands()), 4)
+            assert len(model.chains()) == 2
+            assert set([c.id for c in model.chains()]) == {"E", "F"}
+            assert len(model.ligands()) == 4
 
             model = f.generate_assembly(4)
-            self.assertEqual(len(model.chains()), 2)
-            self.assertEqual(set([c.id for c in model.chains()]), {"G", "H"})
-            self.assertEqual(len(model.ligands()), 4)
+            assert len(model.chains()) == 2
+            assert set([c.id for c in model.chains()]) == {"G", "H"}
+            assert len(model.ligands()) == 4
 
             model = f.generate_assembly(7)
-            self.assertEqual(len(model.chains()), 6)
-            self.assertEqual(set([c.id for c in model.chains()]), {"A", "B"})
-            self.assertEqual(len(model.ligands()), 12)
+            assert len(model.chains()) == 6
+            assert set([c.id for c in model.chains()]) == {"A", "B"}
+            assert len(model.ligands()) == 12
             zn = model.atom(element="ZN")
             liganding_residues = zn.nearby_hets(3, is_metal=False, element__ne="CL")
-            self.assertEqual(len(liganding_residues), 3)
-            self.assertEqual(set([r.id for r in liganding_residues]), {"B.10"})
-            self.assertEqual(set([r.name for r in liganding_residues]), {"HIS"})
+            assert len(liganding_residues) == 3
+            assert set([r.id for r in liganding_residues]) == {"B.10"}
+            assert set([r.name for r in liganding_residues]) == {"HIS"}
             res1, res2, res3 = liganding_residues
 
-            self.assertGreater(res1.atom(name="N").distance_to(res2.atom(name="N")), 10)
+            assert res1.atom(name="N").distance_to(res2.atom(name="N")) > 10
         
 
     def test_4opj(self):
         for e in ["cif", "mmtf", "pdb"]:
             f = io.open("tests/io/integration/files/4opj." + e)
             if e == "cif":
-                self.assertEqual(
-                 f.model.residue("B.6").full_name,
-                 "(2R,3aS,4aR,5aR,5bS)-2-(6-amino-9H-purin-9-yl)-3a-hydroxyhexahydrocyclopropa[4,5]cyclopenta[1,2-b]furan-5a(4H)-yl dihydrogen phosphate"
+                assert (
+                 f.model.residue("B.6").full_name
+                 == "(2R,3aS,4aR,5aR,5bS)-2-(6-amino-9H-purin-9-yl)-3a-hydroxyhexahydrocyclopropa[4,5]cyclopenta[1,2-b]furan-5a(4H)-yl dihydrogen phosphate"
                 )
             elif e =="mmtf":
-                self.assertEqual(f.model.residue("B.6").full_name, "TCY")
+                assert f.model.residue("B.6").full_name == "TCY"
             else:
-                self.assertEqual(
-                 f.model.residue("B.6").full_name,
-                 "(2R,3AS,4AR,5AR,5BS)-2-(6-AMINO-9H-PURIN-9-YL)-3A-HYDROXYHEXAHYDROCYCLOPROPA[4,5]CYCLOPENTA[1,2-B]FURAN-5A(4H)-YL DIHYDROGEN PHOSPHATE"
+                assert (
+                 f.model.residue("B.6").full_name
+                 == "(2R,3AS,4AR,5AR,5BS)-2-(6-AMINO-9H-PURIN-9-YL)-3A-HYDROXYHEXAHYDROCYCLOPROPA[4,5]CYCLOPENTA[1,2-B]FURAN-5A(4H)-YL DIHYDROGEN PHOSPHATE"
                 )
 
             if e == "pdb":
-                self.assertEqual(
-                    f.model.chain("A").information["molecule"], "RIBONUCLEASE H"
+                assert (
+                    f.model.chain("A").information["molecule"] == "RIBONUCLEASE H"
                 )
-                self.assertEqual(
-                    f.model.chain("C").information["molecule"], "RIBONUCLEASE H"
+                assert (
+                    f.model.chain("C").information["molecule"] == "RIBONUCLEASE H"
                 )
-                self.assertEqual(
-                    f.model.chain("B").information["molecule"],
-                    "5'-D(*CP*GP*CP*GP*AP*(TCY)P*TP*TP*CP*GP*CP*G)-3'",
+                assert (
+                    f.model.chain("B").information["molecule"]
+                    == "5'-D(*CP*GP*CP*GP*AP*(TCY)P*TP*TP*CP*GP*CP*G)-3'"
                 )
-                self.assertEqual(
-                    f.model.chain("D").information["molecule"],
-                    "5'-D(*CP*GP*CP*GP*AP*(TCY)P*TP*TP*CP*GP*CP*G)-3'",
+                assert (
+                    f.model.chain("D").information["molecule"]
+                    == "5'-D(*CP*GP*CP*GP*AP*(TCY)P*TP*TP*CP*GP*CP*G)-3'"
                 )
-                self.assertEqual(
-                    f.model.chain("A").information["organism_scientific"],
-                    "BACILLUS HALODURANS",
+                assert (
+                    f.model.chain("A").information["organism_scientific"]
+                    == "BACILLUS HALODURANS"
                 )
-                self.assertNotIn("organism_scientific", f.model.chain("B").information)
+                assert "organism_scientific" not in f.model.chain("B").information
 
     def test_6xlu(self):
         # Branched chains
         for e in ["cif", "mmtf", "pdb"]:
             f = io.open("tests/io/integration/files/6xlu." + e)
-            self.assertEqual(len(f.model.chains()), 3 if e == "pdb" else 18)
-            self.assertEqual(len(f.model.ligands()), 62 if e == "pdb" else 32)
+            assert len(f.model.chains()) == (3 if e == "pdb" else 18)
+            assert len(f.model.ligands()) == (62 if e == "pdb" else 32)
     
 
     @pytest.mark.skip(reason="Could not find a PDB file with secondary structure that biomod can parse.")
@@ -791,4 +787,4 @@ class FileReadingTests(TestCase):
         # Multi character secondary structure
         for e in ["cif"]:
             f = io.open("tests/io/integration/files/3jbp." + e)
-            self.assertEqual(len(f.model.chain("Aa").helices), 4)
+            assert len(f.model.chain("Aa").helices) == 4

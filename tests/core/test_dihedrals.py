@@ -1,12 +1,12 @@
-from unittest import TestCase
+import pytest
 from unittest.mock import patch, PropertyMock
 from biomod.core.atoms import Atom
 from biomod.core.residues import Residue
 from biomod.core.base import Chain
 
-class DihedralAngleTests(TestCase):
+class TestDihedralAngles:
 
-    def setUp(self):
+    def setup_method(self, method):
         self.atom1 = Atom("C", 0, 0, 0, 1, "C1", 0, 0, [0,0,0,0,0,0])
         self.atom2 = Atom("N", 1, 0, 0, 2, "N1", 0, 0, [0,0,0,0,0,0])
         self.atom3 = Atom("C", 1, 1, 0, 3, "C2", 0, 0, [0,0,0,0,0,0])
@@ -14,7 +14,7 @@ class DihedralAngleTests(TestCase):
 
     def test_can_calculate_dihedral_angle(self):
         angle = Atom.dihedral(self.atom1, self.atom2, self.atom3, self.atom4)
-        self.assertAlmostEqual(angle, 180, delta=0.001)
+        assert angle == pytest.approx(180, abs=0.001)
 
     def test_can_calculate_phi_psi_omega(self):
         # Create a mini-chain of 3 residues
@@ -37,15 +37,15 @@ class DihedralAngleTests(TestCase):
         res2.next = res3
 
         # Test middle residue
-        self.assertIsNotNone(res2.phi)
-        self.assertAlmostEqual(res2.phi, 180, delta=0.001)
-        self.assertAlmostEqual(res2.psi, -90, delta=0.001)
-        self.assertAlmostEqual(res2.omega, 180, delta=0.001)
+        assert res2.phi is not None
+        assert res2.phi == pytest.approx(180, abs=0.001)
+        assert res2.psi == pytest.approx(-90, abs=0.001)
+        assert res2.omega == pytest.approx(180, abs=0.001)
 
         # Test termini
-        self.assertIsNone(res1.phi)
-        self.assertIsNone(res3.psi)
-        self.assertIsNone(res3.omega)
+        assert res1.phi is None
+        assert res3.psi is None
+        assert res3.omega is None
 
     def test_chi_angles(self):
         # Test ARG
@@ -56,17 +56,17 @@ class DihedralAngleTests(TestCase):
             Atom("CZ", 3,3,0, 7, "CZ", 0,0,[]), Atom("NH1", 3,4,0, 8, "NH1", 0,0,[])
         ]
         arg = Residue(*arg_atoms, name="ARG", id="A1")
-        self.assertAlmostEqual(arg.chi(1), 180, delta=0.001)
-        self.assertAlmostEqual(arg.chi(2), 180, delta=0.001)
-        self.assertAlmostEqual(arg.chi(3), 180, delta=0.001)
-        self.assertAlmostEqual(arg.chi(4), 180, delta=0.001)
-        self.assertAlmostEqual(arg.chi(5), 180, delta=0.001)
-        self.assertIsNone(arg.chi(6))
+        assert arg.chi(1) == pytest.approx(180, abs=0.001)
+        assert arg.chi(2) == pytest.approx(180, abs=0.001)
+        assert arg.chi(3) == pytest.approx(180, abs=0.001)
+        assert arg.chi(4) == pytest.approx(180, abs=0.001)
+        assert arg.chi(5) == pytest.approx(180, abs=0.001)
+        assert arg.chi(6) is None
 
         # Test GLY (no chi)
         gly = Residue(name="GLY", id="A2")
-        self.assertIsNone(gly.chi(1))
+        assert gly.chi(1) is None
 
         # Test missing atom
         arg_missing = Residue(*arg_atoms[:-1], name="ARG", id="A3")
-        self.assertIsNone(arg_missing.chi(5))
+        assert arg_missing.chi(5) is None
