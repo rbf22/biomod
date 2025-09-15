@@ -1,10 +1,8 @@
 import torch
 import unittest
-import os
 from biomod.energy import vitra_tensors as data_structures
 from biomod.io import vitra_utils as utils
 from biomod.energy.hbond_net import HBondNet
-from biomod.energy import hashings
 from biomod.energy.force_field import ForceField
 
 class TestHbondNetShapes(unittest.TestCase):

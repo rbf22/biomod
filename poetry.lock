@@ -228,6 +228,21 @@ tomli = {version = "*", optional = true, markers = "python_full_version <= \"3.1
 toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
+name = "data-science-types"
+version = "0.2.23"
+description = "Type stubs for Python machine learning libraries"
+optional = false
+python-versions = ">=3.6"
+groups = ["dev"]
+files = [
+    {file = "data-science-types-0.2.23.tar.gz", hash = "sha256:8096b9a35a8a187bf9a122b4707c97de841d810744690ee2a4ac30c6462e0d16"},
+    {file = "data_science_types-0.2.23-py3-none-any.whl", hash = "sha256:bca319abc0e53a0316f9fcb887937e942477cb9e5fc63c8581e0b0438903b977"},
+]
+
+[package.extras]
+dev = ["black", "flake8", "flake8-pyi", "matplotlib", "mypy (==0.770)", "numpy", "pandas", "pytest"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.0"
 description = "Backport of PEP 654 (exception groups)"
@@ -1684,4 +1699,4 @@ markers = {main = "python_version >= \"3.9\"", dev = "python_version >= \"3.9\" 
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.8"
-content-hash = "2bb25f05abb4e33c81c51cea9a462893e6defc698004623f2556fb2a1abc7226"
+content-hash = "589b24084c0e9ec0f7353ec8efa816bf4b94dc206a11c4b2d3e4a979e773d26d"

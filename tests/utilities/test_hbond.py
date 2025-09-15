@@ -2,8 +2,6 @@
 Tests for H-bond calculation.
 """
 
-import gzip
-from unittest.mock import Mock
 import pytest
 import numpy as np
 from biomod.io import io

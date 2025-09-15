@@ -1,5 +1,4 @@
 import numpy as np
-import re
 
 def build_coords_from_ic(atom_name, ic_data, atom_coords):
     """

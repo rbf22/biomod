@@ -1,5 +1,4 @@
 import re
-import numpy as np
 
 def parse_rotamer_data_idx(file_path, var_name):
     with open(file_path, 'r') as f:

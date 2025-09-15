@@ -30,9 +30,9 @@ def calculate_h_bond_energy(donor: Residue, acceptor: Residue):
     # Critical fix: Only calculate energy if donor is NOT proline
     # Proline cannot donate hydrogen bonds because its nitrogen is part of a ring
     if donor.name != "PRO":
-        o_atom = acceptor.atom(name="O")
-        c_atom = acceptor.atom(name="C")
-        n_atom = donor.atom(name="N")
+        o_atom = acceptor.atom(name="O")  # type: ignore
+        c_atom = acceptor.atom(name="C")  # type: ignore
+        n_atom = donor.atom(name="N")  # type: ignore
         if o_atom is None or c_atom is None or n_atom is None:
             return 0.0
         dist_ho = np.linalg.norm(donor.h_coord - np.array(o_atom.location))
@@ -91,7 +91,7 @@ def assign_hydrogen_to_residues(residues: list[Residue]):
     """
     for i, residue in enumerate(residues):
         # Start with nitrogen position
-        n_atom = residue.atom(name="N")
+        n_atom = residue.atom(name="N")  # type: ignore
         if n_atom is None:
             continue
         residue.h_coord = np.array(n_atom.location, dtype=float)
@@ -99,8 +99,8 @@ def assign_hydrogen_to_residues(residues: list[Residue]):
         if residue.name != "PRO":
             if i > 0:
                 prev_residue = residues[i - 1]
-                prev_c = prev_residue.atom(name="C")
-                prev_o = prev_residue.atom(name="O")
+                prev_c = prev_residue.atom(name="C")  # type: ignore
+                prev_o = prev_residue.atom(name="O")  # type: ignore
                 if prev_c is None or prev_o is None:
                     continue
                 # Calculate CO vector and normalize it
@@ -111,7 +111,7 @@ def assign_hydrogen_to_residues(residues: list[Residue]):
                     # Place hydrogen along the CO vector direction from nitrogen
                     residue.h_coord += co_unit
             else:  # First residue
-                ca_atom = residue.atom(name="CA")
+                ca_atom = residue.atom(name="CA")  # type: ignore
                 if ca_atom is not None:
                     n_ca_vector = np.array(ca_atom.location) - np.array(n_atom.location)
                     norm = np.linalg.norm(n_ca_vector)
@@ -145,8 +145,8 @@ def calculate_h_bonds(residues: list[Residue]) -> None:
     for i, res_i in enumerate(residues):
         for j in range(i + 1, len(residues)):
             res_j = residues[j]
-            ca_i = res_i.atom(name="CA")
-            ca_j = res_j.atom(name="CA")
+            ca_i = res_i.atom(name="CA")  # type: ignore
+            ca_j = res_j.atom(name="CA")  # type: ignore
             if ca_i is None or ca_j is None:
                 continue
             if np.linalg.norm(np.array(ca_i.location) - np.array(ca_j.location)) > 9.0:

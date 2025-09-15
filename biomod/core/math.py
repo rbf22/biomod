@@ -1,5 +1,4 @@
 import numpy as np
-from biomod.core.rmsd import kabsch_rmsd
 
 def rotation_matrix(axis, theta):
     """

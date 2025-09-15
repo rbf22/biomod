@@ -1,9 +1,6 @@
 """
 Tests for the io module.
 """
-import gzip
-import pytest
-from io import StringIO
 from biomod.io import io
 from biomod.io.builder import File
 

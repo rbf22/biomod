@@ -17,6 +17,7 @@ msgpack = "*"
 pytest = "*"
 hypothesis = "*"
 pytest-cov = "*"
+data-science-types = "^0.2.23"
 
 [build-system]
 requires = ["poetry-core"]
