@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import torch
 from ..config import TEMPERATURE, PADDING_INDEX
 from . import hashings
-from ..utilities.secondary_structure import data_structures
+from . import vitra_tensors as data_structures
 
 DIELECTRIC = 8.8
 IONIC_STRENGTH = 0.05

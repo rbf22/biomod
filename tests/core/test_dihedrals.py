@@ -1,8 +1,6 @@
 import pytest
-from unittest.mock import patch, PropertyMock
 from biomod.core.atoms import Atom
 from biomod.core.residues import Residue
-from biomod.core.base import Chain
 
 class TestDihedralAngles:
 

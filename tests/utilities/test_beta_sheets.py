@@ -4,7 +4,7 @@ Tests for the beta sheet calculation in the secondary_structure module.
 from unittest.mock import Mock
 from biomod.core.atoms import Atom
 from biomod.core.residues import Residue
-from biomod.utilities.secondary_structure.data_structures import BridgeType, StructureType, BridgePartner
+from biomod.utilities.secondary_structure.data_structures import StructureType, BridgePartner
 from biomod.utilities.secondary_structure import calculate_beta_sheets
 
 def create_mock_bio_residue(res_num, chain_id='A', parent_mock=None):

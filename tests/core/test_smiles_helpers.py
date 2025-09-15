@@ -7,7 +7,7 @@ import pytest
 from biomod.io.smiles import (
     fill_valence, remove_explicit_hydrogens,
     add_explicit_hydrogens, correct_aromatic_rings,
-    valence, kekulize, dekekulize,
+    valence,
 )
 from tests.testhelper import assertEqualGraphs, make_mol
 

@@ -7,7 +7,7 @@ def open(path, *args, **kwargs):
     try:
         with open(path) as f:
             content = f.read()
-    except:
+    except Exception:
         with open(path, "rb") as f:
             content = f.read()
     return parse_string(content, path, *args, **kwargs)

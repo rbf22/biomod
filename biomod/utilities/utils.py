@@ -1,9 +1,6 @@
-import sys
 import numpy as np
 
 from biomod.config import PDB_ATOM_LINE, PDB_TER_LINE, PDB_END_LINE
-from biomod.core.residues import Residue
-from biomod.core.atoms import Atom
 from biomod.core.base import Chain, Model
 from biomod.io.pdb_parser import PDBParser
 

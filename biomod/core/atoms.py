@@ -104,7 +104,7 @@ class Atom:
         except (ValueError, TypeError):
             try:
                 x, y, z = axis
-            except:
+            except Exception:
                 raise ValueError("'{}' is not a valid axis".format(axis))
 
         point = np.array(point)

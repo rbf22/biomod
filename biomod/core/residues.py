@@ -145,6 +145,11 @@ class Residue(Het, metaclass=StructureClass):
         self.hbond_acceptor = [HBond(None, 0.0), HBond(None, 0.0)]
         self.hbond_donor = [HBond(None, 0.0), HBond(None, 0.0)]
         self.h_coord = None
+        self.sheet = None
+        self.beta_partner = None
+        self.secondary_structure = None
+        self.helix_flags = None
+        self.accessibility = None
 
 
     def __repr__(self):
@@ -302,12 +307,14 @@ class Residue(Het, metaclass=StructureClass):
 
         from ..utilities.utils import find_downstream_atoms_in_residue
         current_angle = self.phi
-        if current_angle is None: return
+        if current_angle is None:
+            return
 
         delta = math.radians(angle - current_angle)
         n = self.atom(name="N")
         ca = self.atom(name="CA")
-        if n is None or ca is None: return
+        if n is None or ca is None:
+            return
 
         axis = np.array(ca.location) - np.array(n.location)
         point = n.location
@@ -322,7 +329,6 @@ class Residue(Het, metaclass=StructureClass):
 
         :param float angle: The angle to set, in degrees."""
 
-        from ..utilities.utils import find_downstream_atoms_in_chain
         current_angle = self.psi
         if current_angle is not None:
             delta = math.radians(angle - current_angle)
@@ -390,7 +396,8 @@ class Residue(Het, metaclass=StructureClass):
             atom_names = CHI_ANGLES[self.name][n - 1]
             try:
                 atoms = [self.atom(name=name) for name in atom_names]
-                if None in atoms: return None
+                if None in atoms:
+                    return None
                 return Atom.dihedral(*atoms)
             except AttributeError:
                 return None

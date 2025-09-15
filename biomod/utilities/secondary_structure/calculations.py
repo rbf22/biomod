@@ -212,21 +212,21 @@ def calculate_beta_sheets(residues: list[Residue]):
         i_end = int(bridge.i[-1].id.split('.')[-1])
         chain_id = bridge.i[0].chain.id
         for res_num in range(i_start, i_end + 1):
-            res = res_map.get(f"{chain_id}.{res_num}")
-            if res:
-                if res.secondary_structure != StructureType.STRAND:
-                    res.secondary_structure = ss
-                res.sheet = bridge.sheet
+            residue = res_map.get(f"{chain_id}.{res_num}")
+            if residue:
+                if residue.secondary_structure != StructureType.STRAND:
+                    residue.secondary_structure = ss
+                residue.sheet = bridge.sheet
 
         j_start = min(int(r.id.split('.')[-1]) for r in bridge.j)
         j_end = max(int(r.id.split('.')[-1]) for r in bridge.j)
         chain_id = bridge.j[0].chain.id
         for res_num in range(j_start, j_end + 1):
-            res = res_map.get(f"{chain_id}.{res_num}")
-            if res:
-                if res.secondary_structure != StructureType.STRAND:
-                    res.secondary_structure = ss
-                res.sheet = bridge.sheet
+            residue = res_map.get(f"{chain_id}.{res_num}")
+            if residue:
+                if residue.secondary_structure != StructureType.STRAND:
+                    residue.secondary_structure = ss
+                residue.sheet = bridge.sheet
 
 def calculate_pp_helices(residues: list[Residue], stretch_length: int = 3):
     """Identifies Polyproline II (PPII) helices based on phi/psi angles.

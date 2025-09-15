@@ -3,7 +3,7 @@
 from ..core.atoms import Atom
 from ..core.residues import Residue, Ligand
 from ..core.base import Chain, Model
-from ..core.constants import *
+
 
 class File:
     """When a file is parsed, the result is a ``File``. It contains the

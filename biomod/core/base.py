@@ -5,7 +5,7 @@ import numpy as np
 import math
 import warnings
 from collections import Counter, defaultdict
-from .math import kabsch_rmsd
+from .rmsd import kabsch_rmsd
 
 def get_object_from_filter(obj, components):
     """Gets the object whose attributes are actually being queried, which may be
@@ -670,7 +670,6 @@ class Model(AtomStructure, metaclass=StructureClass):
         :param *molecules: The chains, ligands, and waters that will inhabit the model.
         :param File file: The file the model came from."""
 
-        from .residues import Ligand
         AtomStructure.__init__(self, None, None)
         self._chains = set()
         self._ligands = set()
@@ -929,7 +928,6 @@ class Chain(Molecule, metaclass=StructureClass):
         chain is part of a model.
 
         :rtype: ``set``"""
-        from .residues import Ligand
         return StructureSet() if self._model is None else StructureSet(
          *[
           ligand for ligand in self._model._ligands.structures

@@ -18,6 +18,7 @@ Contains helper functions for parsing and writing SMILES strings, as well as
 some convenience functions for adding hydrogens, and detecting aromaticity.
 """
 
+import enum
 import logging
 import re
 import operator
@@ -1024,8 +1025,6 @@ def _interpret_cis_trans_tokens(molecule, ez_pairs):
         molecule.nodes[ligand_second]['ez_isomer'].append(
             (ligand_second, anchor_second, anchor_first, ligand_first, ez_isomer)
         )
-
-import enum
 
 @enum.unique
 class TokenType(enum.Enum):

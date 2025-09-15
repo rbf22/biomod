@@ -7,7 +7,7 @@ from . import pdb
 from . import mmcif
 from . import mmtf
 from ..core.base import Model, Chain
-from ..core.residues import Residue, Ligand
+from ..core.residues import Residue
 from ..core.atoms import Atom
 from .builder import data_dict_to_file
 

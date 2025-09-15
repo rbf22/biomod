@@ -2,13 +2,13 @@
 Tests for H-bond calculation.
 """
 
-import gzip
-from unittest.mock import Mock
 import pytest
 import numpy as np
 from biomod.io import io
 from biomod.utilities.hbond import calculate_h_bonds, calculate_h_bond_energy, assign_hydrogen_to_residues
 from biomod.config import MIN_HBOND_ENERGY
+from biomod.core.residues import Residue
+from biomod.core.atoms import Atom
 
 
 def parse_reference_dssp(filepath):
@@ -166,9 +166,6 @@ def test_calculate_h_bonds_comparative():
                 print(f"  ref:   {ref_a}")
             assert dsspy_a['offset'] == ref_a['offset']
             assert dsspy_a['energy'] == pytest.approx(ref_a['energy'], abs=1e-1)
-
-from biomod.core.residues import Residue
-from biomod.core.atoms import Atom
 
 def test_calculate_h_bond_energy_minimal_distance():
     """

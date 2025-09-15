@@ -217,9 +217,9 @@ class HBondNet(torch.nn.Module):
         hpw_flat = hydrogens_pairwise_coords.permute(2, 0, 1).reshape(3, -1).permute(1, 0)
         distance_plane2H = math_utils.point_to_plane_dist(acc_flat, acc_pa1, acc_pa2, hpw_flat).view(-1, n_H * n_FO)
         dists_hyd = torch.norm((acceptor_multiH - hydrogens_pairwise_coords), dim=(-1))
-        hybridation_mask = ~masked_atom_description[:, self.hybrid1_ha].eq(hashings.hashing_hybrid['SP2_O_ORB2']) & ~masked_atom_description[:, self.hybrid1_ha].eq(hashings.hashing_hybrid['SP2_O_ORB2'])
+        hybridization_mask = ~masked_atom_description[:, self.hybrid1_ha].eq(hashings.hashing_hybrid['SP2_O_ORB2']) & ~masked_atom_description[:, self.hybrid1_ha].eq(hashings.hashing_hybrid['SP2_O_ORB2'])
         plane_distance_mask = (distance_plane2H / dists_hyd - masked_atom_props[:, self.hbond_plane_dist1_ha].unsqueeze(1).expand(distance_plane2H.shape)).le(0)
-        plane_Hybrid_Hmask = hybridation_mask.unsqueeze(-1).expand(plane_distance_mask.shape) | plane_distance_mask
+        plane_Hybrid_Hmask = hybridization_mask.unsqueeze(-1).expand(plane_distance_mask.shape) | plane_distance_mask
         bad_angles_mask = bad_angles_mask & plane_Hybrid_Hmask
         third_mask = hybridization_mask | plane_distance_mask.sum(dim=(-1)).type(first_mask.type()) & bad_angles_mask.sum(dim=(-1)).type(first_mask.type())
         donor_multiH = donor_multiH[third_mask]

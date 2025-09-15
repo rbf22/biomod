@@ -13,7 +13,7 @@ import numpy as np
 
 # NOTE: The imports below will need to be fixed after the refactoring.
 # from .pdb_datastructures import Molecule
-# from .energy import calc_ca_energy
+from .energy import calc_ca_energy
 # from .data import AA_NAMES, SHORT_AA_NAMES, AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
 # from .geometry import calc_distance, calc_r14, superimpose, cross, norm
 from .rotamer_data import ROT_STAT_IDX, ROT_STAT_COORDS
@@ -221,12 +221,18 @@ def rebuild_backbone(chain):
         bin13_2 = int((r13_2 - 4.6) / 0.3)
         bin14 = int((r14 + 11.0) / 0.3)
 
-        if bin13_1 < 0: bin13_1 = 0
-        if bin13_2 < 0: bin13_2 = 0
-        if bin14 < 0: bin14 = 0
-        if bin13_1 > 9: bin13_1 = 9
-        if bin13_2 > 9: bin13_2 = 9
-        if bin14 > 73: bin14 = 73
+        if bin13_1 < 0:
+            bin13_1 = 0
+        if bin13_2 < 0:
+            bin13_2 = 0
+        if bin14 < 0:
+            bin14 = 0
+        if bin13_1 > 9:
+            bin13_1 = 9
+        if bin13_2 > 9:
+            bin13_2 = 9
+        if bin14 > 73:
+            bin14 = 73
 
         rbins.append([bin13_1, bin13_2, bin14])
 
@@ -324,16 +330,16 @@ def ca_optimize(chain, ca_trajectory, ini_file, cispro, ca_random, ca_start_dist
         for i in range(chain_length):
             gradient[i][0] = gradient[i][1] = gradient[i][2] = 0.0
 
-        e_pot = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, 0.0, energies, True, ca_start_dist)
+        calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, 0.0, energies, True, ca_start_dist)
 
         # Line search
-        alpha1 = -1.0
-        alpha2 = 0.0
-        alpha3 = 1.0
+        # alpha1 = -1.0
+        # alpha2 = 0.0
+        # alpha3 = 1.0
 
-        ene1 = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, alpha1, energies, False, ca_start_dist)
-        ene2 = e_pot
-        ene3 = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, alpha3, energies, False, ca_start_dist)
+        # ene1 = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, alpha1, energies, False, ca_start_dist)
+        # ene2 = e_pot
+        # ene3 = calc_ca_energy(c_alpha, new_c_alpha, init_c_alpha, gradient, alpha3, energies, False, ca_start_dist)
 
         # Simplified line search
         last_alpha = 0.01
@@ -406,7 +412,7 @@ def molecule_to_pdb_string(molecule: Molecule) -> str:
 
 if __name__ == "__main__":
     import argparse
-    from .data import AA_NAMES, SHORT_AA_NAMES, AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
+    from .data import AA_NUMS, NHEAVY, HEAVY_ATOM_NAMES, NCO_STAT, NCO_STAT_PRO
     from ..geometry import calc_distance, calc_r14, superimpose, cross, norm
 
     parser = argparse.ArgumentParser(description="Rebuild protein structure from C-alpha trace.")
