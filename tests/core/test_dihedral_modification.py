@@ -1,13 +1,12 @@
 import pytest
-from unittest import TestCase
 from biomod.core.atoms import Atom
 from biomod.core.residues import Residue
 from biomod.core.base import Chain
 import numpy as np
 
-class DihedralModificationTests(TestCase):
+class TestDihedralModification:
 
-    def setUp(self):
+    def setup_method(self, method):
         # A small chain of 3 residues
         self.res1_atoms = [
             Atom("C", 0, 0, 0, 1, "C", 0, 0, []),
@@ -33,7 +32,7 @@ class DihedralModificationTests(TestCase):
         chain.infer_bonds()
 
         # Check initial state
-        self.assertAlmostEqual(self.res2.phi, 180, delta=0.001)
+        assert self.res2.phi == pytest.approx(180, abs=0.001)
 
         # Save original locations
         original_n_loc = self.res2.atom(name="N").location
@@ -44,12 +43,12 @@ class DihedralModificationTests(TestCase):
         self.res2.set_phi(-60)
 
         # Check final angle
-        self.assertAlmostEqual(self.res2.phi, -60, delta=0.001)
+        assert self.res2.phi == pytest.approx(-60, abs=0.001)
 
         # Check atom movements
-        self.assertTrue(np.allclose(original_n_loc, self.res2.atom(name="N").location))
-        self.assertTrue(np.allclose(original_ca_loc, self.res2.atom(name="CA").location))
-        self.assertFalse(np.allclose(original_c_loc, self.res2.atom(name="C").location))
+        assert np.allclose(original_n_loc, self.res2.atom(name="N").location)
+        assert np.allclose(original_ca_loc, self.res2.atom(name="CA").location)
+        assert not np.allclose(original_c_loc, self.res2.atom(name="C").location)
 
 
     def test_can_set_psi(self):
@@ -57,8 +56,8 @@ class DihedralModificationTests(TestCase):
         chain.infer_bonds()
         original_n_loc = self.res3.atom(name="N").location
         self.res2.set_psi(60)
-        self.assertAlmostEqual(self.res2.psi, 60, delta=0.001)
-        self.assertFalse(np.allclose(original_n_loc, self.res3.atom(name="N").location))
+        assert self.res2.psi == pytest.approx(60, abs=0.001)
+        assert not np.allclose(original_n_loc, self.res3.atom(name="N").location)
 
 
     def test_can_set_omega(self):
@@ -66,8 +65,8 @@ class DihedralModificationTests(TestCase):
         chain.infer_bonds()
         original_ca_loc = self.res3.atom(name="CA").location
         self.res2.set_omega(170)
-        self.assertAlmostEqual(self.res2.omega, 170, delta=0.001)
-        self.assertFalse(np.allclose(original_ca_loc, self.res3.atom(name="CA").location))
+        assert self.res2.omega == pytest.approx(170, abs=0.001)
+        assert not np.allclose(original_ca_loc, self.res3.atom(name="CA").location)
 
 
     @pytest.mark.skip(reason="This test is failing due to a subtle bug in the rotation logic that could not be resolved.")
@@ -82,6 +81,6 @@ class DihedralModificationTests(TestCase):
         original_cd_loc = arg.atom(name="CD").location
         original_ca_loc = arg.atom(name="CA").location
         arg.set_chi(2, 120)
-        self.assertAlmostEqual(arg.chi(2), 120, delta=0.001)
-        self.assertFalse(np.allclose(original_cd_loc, arg.atom(name="CD").location))
-        self.assertTrue(np.allclose(original_ca_loc, arg.atom(name="CA").location))
+        assert arg.chi(2) == pytest.approx(120, abs=0.001)
+        assert not np.allclose(original_cd_loc, arg.atom(name="CD").location)
+        assert np.allclose(original_ca_loc, arg.atom(name="CA").location)

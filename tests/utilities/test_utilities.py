@@ -1,5 +1,4 @@
 import pytest
-from unittest import TestCase
 from unittest.mock import Mock, patch, MagicMock
 from biomod.core.atoms import Atom
 from biomod.io.utils import (
@@ -10,7 +9,7 @@ from biomod.io.mmtf import mmtf_bytes_to_mmtf_dict, mmtf_dict_to_data_dict
 from biomod.io.pdb import pdb_string_to_pdb_dict, pdb_dict_to_data_dict
 from biomod.utilities.utils import find_downstream_atoms_in_residue
 
-class DownstreamAtomFindingTests(TestCase):
+class TestDownstreamAtomFinding:
 
     def test_can_find_downstream_atoms(self):
         a1 = Atom("C", 0, 0, 0, 1, "C1", 0, 0, [])
@@ -24,150 +23,143 @@ class DownstreamAtomFindingTests(TestCase):
         a3.bond(a5)
 
         downstream = find_downstream_atoms_in_residue(a3, a2)
-        self.assertEqual(downstream, {a3, a4, a5})
+        assert downstream == {a3, a4, a5}
 
 
 @pytest.mark.skip(reason="The function it tests (biomod.io.utils.open) has a bug that causes infinite recursion.")
-class OpeningTests(TestCase):
+class TestOpening:
 
-    def setUp(self):
-        self.patch1 = patch("builtins.open")
-        self.patch2 = patch("biomod.io.utils.parse_string")
-        self.mock_open = self.patch1.start()
-        self.mock_parse = self.patch2.start()
-        open_return = MagicMock()
-        mock_file = Mock()
-        open_return.__enter__.return_value = mock_file
-        mock_file.read.return_value = "returnstring"
-        self.mock_open.return_value = open_return
-
-
-    def tearDown(self):
-        self.patch1.stop()
-        self.patch2.stop()
+    @pytest.fixture
+    def open_fixture(self):
+        with patch("builtins.open") as mock_open, \
+             patch("biomod.io.utils.parse_string") as mock_parse:
+            open_return = MagicMock()
+            mock_file = Mock()
+            open_return.__enter__.return_value = mock_file
+            mock_file.read.return_value = "returnstring"
+            mock_open.return_value = open_return
+            yield mock_open, mock_parse
 
 
-    def test_can_open_string(self):
-        self.assertEqual(open("path/to/file", 1, a=2), self.mock_parse.return_value)
-        self.mock_open.assert_called_with("path/to/file")
-        self.mock_parse.assert_called_with("returnstring", "path/to/file", 1, a=2)
+    def test_can_open_string(self, open_fixture):
+        mock_open, mock_parse = open_fixture
+        assert open("path/to/file", 1, a=2) == mock_parse.return_value
+        mock_open.assert_called_with("path/to/file")
+        mock_parse.assert_called_with("returnstring", "path/to/file", 1, a=2)
 
 
-    def test_can_open_bytestring(self):
-        self.mock_open.side_effect = [Exception, self.mock_open.return_value]
-        self.assertEqual(open("path/to/file", 1, a=2), self.mock_parse.return_value)
-        self.mock_open.assert_called_with("path/to/file", "rb")
-        self.mock_parse.assert_called_with("returnstring", "path/to/file", 1, a=2)
+    def test_can_open_bytestring(self, open_fixture):
+        mock_open, mock_parse = open_fixture
+        mock_open.side_effect = [Exception, mock_open.return_value]
+        assert open("path/to/file", 1, a=2) == mock_parse.return_value
+        mock_open.assert_called_with("path/to/file", "rb")
+        mock_parse.assert_called_with("returnstring", "path/to/file", 1, a=2)
 
 
 @pytest.mark.skip(reason="The function it tests (biomod.io.utils.fetch) is not implemented.")
-class FetchingTests(TestCase):
+class TestFetching:
 
-    def setUp(self):
-        self.patch1 = patch("requests.get")
-        self.mock_get = self.patch1.start()
-        self.mock_get.return_value = Mock(status_code=200, text="ABC")
-        self.patch2 = patch("biomod.io.utils.parse_string")
-        self.mock_parse = self.patch2.start()
-
-
-    def tearDown(self):
-        self.patch1.stop()
-        self.patch2.stop()
+    @pytest.fixture
+    def fetch_fixture(self):
+        with patch("requests.get") as mock_get, \
+             patch("biomod.io.utils.parse_string") as mock_parse:
+            mock_get.return_value = Mock(status_code=200, text="ABC")
+            yield mock_get, mock_parse
 
 
-    def test_can_fetch_cif(self):
+    def test_can_fetch_cif(self, fetch_fixture):
+        mock_get, mock_parse = fetch_fixture
         f = fetch("1ABC", 1, b=2)
-        self.mock_get.assert_called_with("https://files.rcsb.org/view/1abc.cif", stream=True)
-        self.mock_parse.assert_called_with("ABC", "1ABC.cif", 1, b=2)
-        self.assertEqual(f, self.mock_parse.return_value)
+        mock_get.assert_called_with("https://files.rcsb.org/view/1abc.cif", stream=True)
+        mock_parse.assert_called_with("ABC", "1ABC.cif", 1, b=2)
+        assert f == mock_parse.return_value
 
 
-    def test_can_fetch_pdb(self):
+    def test_can_fetch_pdb(self, fetch_fixture):
+        mock_get, mock_parse = fetch_fixture
         f = fetch("1ABC.pdb", 1, b=2)
-        self.mock_get.assert_called_with("https://files.rcsb.org/view/1abc.pdb", stream=True)
-        self.mock_parse.assert_called_with("ABC", "1ABC.pdb", 1, b=2)
-        self.assertEqual(f, self.mock_parse.return_value)
+        mock_get.assert_called_with("https://files.rcsb.org/view/1abc.pdb", stream=True)
+        mock_parse.assert_called_with("ABC", "1ABC.pdb", 1, b=2)
+        assert f == mock_parse.return_value
 
 
-    def test_can_fetch_mmtf(self):
-        self.mock_get.return_value.content = b"ABC"
+    def test_can_fetch_mmtf(self, fetch_fixture):
+        mock_get, mock_parse = fetch_fixture
+        mock_get.return_value.content = b"ABC"
         f = fetch("1ABC.mmtf", 1, b=2)
-        self.mock_get.assert_called_with("https://mmtf.rcsb.org/v1.0/full/1abc", stream=True)
-        self.mock_parse.assert_called_with(b"ABC", "1ABC.mmtf", 1, b=2)
-        self.assertEqual(f, self.mock_parse.return_value)
+        mock_get.assert_called_with("https://mmtf.rcsb.org/v1.0/full/1abc", stream=True)
+        mock_parse.assert_called_with(b"ABC", "1ABC.mmtf", 1, b=2)
+        assert f == mock_parse.return_value
 
 
-    def test_can_fetch_by_url(self):
+    def test_can_fetch_by_url(self, fetch_fixture):
+        mock_get, mock_parse = fetch_fixture
         f = fetch("https://website.com/1ABC", 1, b=2)
-        self.mock_get.assert_called_with("https://website.com/1ABC", stream=True)
-        self.mock_parse.assert_called_with("ABC", "https://website.com/1ABC", 1, b=2)
-        self.assertEqual(f, self.mock_parse.return_value)
+        mock_get.assert_called_with("https://website.com/1ABC", stream=True)
+        mock_parse.assert_called_with("ABC", "https://website.com/1ABC", 1, b=2)
+        assert f == mock_parse.return_value
 
 
-    def test_can_handle_no_results(self):
-        self.mock_get.return_value.status_code = 400
-        with self.assertRaises(ValueError):
+    def test_can_handle_no_results(self, fetch_fixture):
+        mock_get, mock_parse = fetch_fixture
+        mock_get.return_value.status_code = 400
+        with pytest.raises(ValueError):
             fetch("1ABC", 1, b=2)
 
 
 @pytest.mark.skip(reason="The function it tests (biomod.io.utils.fetch_over_ssh) is not implemented.")
-class FetchingOverSshTests(TestCase):
+class TestFetchingOverSsh:
 
-    def setUp(self):
-        self.patch1 = patch("paramiko.SSHClient")
-        self.mock_ssh = self.patch1.start()
-        self.mock_client = Mock()
-        self.mock_ssh.return_value = self.mock_client
-        self.mock_client.exec_command.return_value = (Mock(), Mock(), Mock())
-        self.mock_client.exec_command.return_value[1].read.return_value = b"STRING"
-        self.patch2 = patch("paramiko.AutoAddPolicy")
-        self.mock_policy = self.patch2.start()
-        self.mock_policy.return_value = "POLICY"
-        self.patch3 = patch("biomod.io.utils.parse_string")
-        self.mock_parse = self.patch3.start()
-
-
-    def tearDown(self):
-        self.patch1.stop()
-        self.patch2.stop()
-        self.patch3.stop()
+    @pytest.fixture
+    def ssh_fixture(self):
+        with patch("paramiko.SSHClient") as mock_ssh, \
+             patch("paramiko.AutoAddPolicy") as mock_policy, \
+             patch("biomod.io.utils.parse_string") as mock_parse:
+            mock_client = Mock()
+            mock_ssh.return_value = mock_client
+            mock_client.exec_command.return_value = (Mock(), Mock(), Mock())
+            mock_client.exec_command.return_value[1].read.return_value = b"STRING"
+            mock_policy.return_value = "POLICY"
+            yield mock_client, mock_parse
 
 
-    def test_can_get_filestring_over_ssh_with_keys(self):
+    def test_can_get_filestring_over_ssh_with_keys(self, ssh_fixture):
+        mock_client, mock_parse = ssh_fixture
         f = fetch_over_ssh("HOST", "USER", "/path/", 1, a=2)
-        self.mock_client.set_missing_host_key_policy.assert_called_with("POLICY")
-        self.mock_client.load_system_host_keys.assert_called_with()
-        self.mock_client.connect.assert_called_with(hostname="HOST", username="USER")
-        self.mock_client.exec_command.assert_called_with("less /path/")
-        self.mock_client.close.assert_called_with()
-        self.mock_parse.assert_called_with("STRING", "/path/", 1, a=2)
-        self.assertIs(f, self.mock_parse.return_value)
+        mock_client.set_missing_host_key_policy.assert_called_with("POLICY")
+        mock_client.load_system_host_keys.assert_called_with()
+        mock_client.connect.assert_called_with(hostname="HOST", username="USER")
+        mock_client.exec_command.assert_called_with("less /path/")
+        mock_client.close.assert_called_with()
+        mock_parse.assert_called_with("STRING", "/path/", 1, a=2)
+        assert f is mock_parse.return_value
 
 
-    def test_can_get_filestring_over_ssh_with_password(self):
+    def test_can_get_filestring_over_ssh_with_password(self, ssh_fixture):
+        mock_client, mock_parse = ssh_fixture
         f = fetch_over_ssh("HOST", "USER", "/path/", 1, password="xxx", a=2)
-        self.mock_client.set_missing_host_key_policy.assert_called_with("POLICY")
-        self.assertFalse(self.mock_client.load_system_host_keys.called)
-        self.mock_client.connect.assert_called_with(
+        mock_client.set_missing_host_key_policy.assert_called_with("POLICY")
+        assert not mock_client.load_system_host_keys.called
+        mock_client.connect.assert_called_with(
          hostname="HOST", username="USER", password="xxx"
         )
-        self.mock_client.exec_command.assert_called_with("less /path/")
-        self.mock_client.close.assert_called_with()
-        self.mock_parse.assert_called_with("STRING", "/path/", 1, a=2)
-        self.assertIs(f, self.mock_parse.return_value)
+        mock_client.exec_command.assert_called_with("less /path/")
+        mock_client.close.assert_called_with()
+        mock_parse.assert_called_with("STRING", "/path/", 1, a=2)
+        assert f is mock_parse.return_value
 
 
-    def test_connection_is_always_closed(self):
-        self.mock_client.set_missing_host_key_policy.side_effect = Exception
+    def test_connection_is_always_closed(self, ssh_fixture):
+        mock_client, mock_parse = ssh_fixture
+        mock_client.set_missing_host_key_policy.side_effect = Exception
         try:
             fetch_over_ssh("HOST", "USER", "/path/")
         except Exception:
             pass
-        self.mock_client.close.assert_called_with()
+        mock_client.close.assert_called_with()
 
 
-class StringParsingTests(TestCase):
+class TestStringParsing:
 
     @patch("biomod.io.utils.get_parse_functions")
     def test_can_get_file_dict(self, mock_get):
@@ -175,7 +167,7 @@ class StringParsingTests(TestCase):
         f = parse_string("ABCD", "file.xyz", file_dict=True)
         mock_get.assert_called_with("ABCD", "file.xyz")
         mock_get.return_value[0].assert_called_with("ABCD")
-        self.assertEqual(f, mock_get.return_value[0].return_value)
+        assert f == mock_get.return_value[0].return_value
 
 
     @patch("biomod.io.utils.get_parse_functions")
@@ -185,7 +177,7 @@ class StringParsingTests(TestCase):
         mock_get.assert_called_with("ABCD", "file.xyz")
         mock_get.return_value[0].assert_called_with("ABCD")
         mock_get.return_value[1].assert_called_with(mock_get.return_value[0].return_value)
-        self.assertEqual(f, mock_get.return_value[1].return_value)
+        assert f == mock_get.return_value[1].return_value
 
 
     @patch("biomod.io.utils.get_parse_functions")
@@ -198,50 +190,50 @@ class StringParsingTests(TestCase):
         mock_get.return_value[0].assert_called_with("ABCD")
         mock_get.return_value[1].assert_called_with(mock_get.return_value[0].return_value)
         mock_data.assert_called_with(mock_get.return_value[1].return_value, "cif")
-        self.assertEqual(f, mock_data.return_value)
+        assert f == mock_data.return_value
 
 
 
-class ParseFunctionGettingTests(TestCase):
+class TestParseFunctionGetting:
 
     def test_can_get_cif_functions(self):
         f1, f2 = get_parse_functions("ABC", "x.cif")
-        self.assertIs(f1, mmcif_string_to_mmcif_dict)
-        self.assertIs(f2, mmcif_dict_to_data_dict)
+        assert f1 is mmcif_string_to_mmcif_dict
+        assert f2 is mmcif_dict_to_data_dict
 
 
     def test_can_get_mmtf_functions(self):
         f1, f2 = get_parse_functions("ABC", "x.mmtf")
-        self.assertIs(f1, mmtf_bytes_to_mmtf_dict)
-        self.assertIs(f2, mmtf_dict_to_data_dict)
+        assert f1 is mmtf_bytes_to_mmtf_dict
+        assert f2 is mmtf_dict_to_data_dict
 
 
     def test_can_get_pdb_functions(self):
         f1, f2 = get_parse_functions("ABC", "x.pdb")
-        self.assertIs(f1, pdb_string_to_pdb_dict)
-        self.assertIs(f2, pdb_dict_to_data_dict)
+        assert f1 is pdb_string_to_pdb_dict
+        assert f2 is pdb_dict_to_data_dict
 
 
     def test_bytes_mean_mmtf(self):
         f1, f2 = get_parse_functions(b"ABC", "x.xxx")
-        self.assertIs(f1, mmtf_bytes_to_mmtf_dict)
-        self.assertIs(f2, mmtf_dict_to_data_dict)
+        assert f1 is mmtf_bytes_to_mmtf_dict
+        assert f2 is mmtf_dict_to_data_dict
 
 
     def test_can_identify_cif(self):
         f1, f2 = get_parse_functions("ABC_atom_sites", "x.xxx")
-        self.assertIs(f1, mmcif_string_to_mmcif_dict)
-        self.assertIs(f2, mmcif_dict_to_data_dict)
+        assert f1 is mmcif_string_to_mmcif_dict
+        assert f2 is mmcif_dict_to_data_dict
 
 
     def test_can_identify_pdb(self):
         f1, f2 = get_parse_functions("ABC", "x.xxx")
-        self.assertIs(f1, pdb_string_to_pdb_dict)
-        self.assertIs(f2, pdb_dict_to_data_dict)
+        assert f1 is pdb_string_to_pdb_dict
+        assert f2 is pdb_dict_to_data_dict
 
 
 @pytest.mark.skip(reason="The function it tests (biomod.io.utils.save) is not implemented.")
-class Saving(TestCase):
+class TestSaving:
 
     @patch("builtins.open")
     def test_saves_string_to_file(self, mock_open):

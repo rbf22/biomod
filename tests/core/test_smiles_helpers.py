@@ -59,7 +59,7 @@ hydrogen_cases = [
         remove_explicit_hydrogens, {},
         [(0, H()), (1, H())],
         [bond(0, 1)],
-        [(0, {"element": "H", "hcount": 0}), (1, {"element": "H", "hcount": 0})],
+        [(0, H(hcount=0)), (1, H(hcount=0))],
         [bond(0, 1)],
     ),
 ]
