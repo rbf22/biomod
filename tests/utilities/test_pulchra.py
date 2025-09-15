@@ -8,7 +8,6 @@ PROJECT_ROOT = TEST_FILE_PATH.parent.parent.parent
 GOLDEN_OUTPUTS_DIR = PROJECT_ROOT / "tests/reference_data"
 
 
-@pytest.mark.skip(reason="The python script biomod/utilities/rebuild/main.py is broken and produces different output from the golden file.")
 def test_multichain_output(tmp_path):
     # Setup paths for the multichain test
     input_pdb = PROJECT_ROOT / "tests/reference_data/7laf_ca.pdb"
@@ -36,7 +35,6 @@ def test_multichain_output(tmp_path):
     assert generated_output == golden_output, "Multichain output does not match golden file."
 
 
-@pytest.mark.skip(reason="The python script biomod/utilities/rebuild/main.py is broken")
 def test_python_pulchra_hydrogens(tmp_path):
     """
     Tests the Python version of Pulchra with hydrogen generation.

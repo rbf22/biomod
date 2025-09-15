@@ -69,7 +69,6 @@ class TestDihedralModification:
         assert not np.allclose(original_ca_loc, self.res3.atom(name="CA").location)
 
 
-    @pytest.mark.skip(reason="This test is failing due to a subtle bug in the rotation logic that could not be resolved.")
     def test_can_set_chi(self):
         arg_atoms = [
             Atom("N", 0,0,0, 1, "N", 0,0,[]), Atom("CA", 0,1,0, 2, "CA", 0,0,[]),
