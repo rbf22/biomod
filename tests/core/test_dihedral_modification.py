@@ -71,9 +71,9 @@ class TestDihedralModification:
 
     def test_can_set_chi(self):
         arg_atoms = [
-            Atom("N", 0,0,0, 1, "N", 0,0,[]), Atom("CA", 0,1,0, 2, "CA", 0,0,[]),
-            Atom("CB", 1,1,0, 3, "CB", 0,0,[]), Atom("CG", 2,2,0, 4, "CG", 0,0,[]),
-            Atom("CD", 3,2,1, 5, "CD", 0,0,[]),
+            Atom("N", 0,0,0, 1, "N", 0,0,[]), Atom("C", 0,1,0, 2, "CA", 0,0,[]),
+            Atom("C", 1,1,0, 3, "CB", 0,0,[]), Atom("C", 2,2,0, 4, "CG", 0,0,[]),
+            Atom("C", 3,2,1, 5, "CD", 0,0,[]),
         ]
         arg = Residue(*arg_atoms, name="ARG", id="A1")
         arg.infer_bonds()
