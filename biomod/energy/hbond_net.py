@@ -1176,7 +1176,7 @@ class HBondNet(torch.nn.Module):
         finalSC_components, _ = finalSC_sum_components.min(dim=-1, keepdim=True)  # min over alternatives
 
         # Return 5-D tensors consistent with electro_net (which uses unsqueeze(-1))
-        return finalMC_min, finalSC_components
+        return finalMC_min.unsqueeze(-1), finalSC_components.unsqueeze(-1)
 
     def getWeights(self):
         pass

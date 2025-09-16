@@ -42,7 +42,7 @@ class TestHbondNetShapes(unittest.TestCase):
         # 4. Create other dummy inputs for forward pass
         # These tensors are not directly available from create_info_tensors, so we create them.
         # We need to get some other tensors that are calculated inside ForceField
-        coords, partners_final, fake_atoms, atom_pairs = ff._prepare_tensors(coordinates,
+        coords, partners_final, fake_atoms, atom_pairs, _ = ff._prepare_tensors(coordinates,
             (atom_number, atom_description, coords_indexing_atom, partners_indexing_atom, angle_indices, alternative_mask))
 
         # The disulfide network and facc are also needed.

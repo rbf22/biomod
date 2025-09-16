@@ -116,6 +116,31 @@ class ForceField(torch.nn.Module):
 
     def _prepare_tensors(self, coordinates, info_tensors):
         """Prepares the initial tensors for the energy calculation."""
+        atom_number, atom_description, coords_indexing_atom, partners_indexing_atom, angle_indices, alternative_mask = info_tensors
+
+        resnum_col = hashings.atom_description_hash['resnum']
+        chain_col = hashings.atom_description_hash['chain']
+        batch_col = hashings.atom_description_hash['batch']
+
+        resnum = atom_description[:, resnum_col]
+        chain_ind = atom_description[:, chain_col]
+        batch_ind = atom_description[:, batch_col]
+
+        # Create a new re-indexed resnum
+        new_resnum = torch.zeros_like(resnum)
+
+        for b in range(batch_ind.max() + 1):
+            for c in range(chain_ind.max() + 1):
+                mask = (batch_ind == b) & (chain_ind == c)
+                if mask.any():
+                    unique_res = torch.unique(resnum[mask])
+                    for i, res_val in enumerate(unique_res):
+                        new_resnum[mask & (resnum == res_val)] = i
+
+        new_atom_description = atom_description.clone()
+        new_atom_description[:, resnum_col] = new_resnum
+
+        info_tensors = (atom_number, new_atom_description, coords_indexing_atom, partners_indexing_atom, angle_indices, alternative_mask)
         atom_number, atom_description, coords_indexing_atom, partners_indexing_atom, _, _ = info_tensors
 
         partners_final1 = torch.full((atom_description.shape[0], 3), float(PADDING_INDEX), device=self.device)
@@ -145,7 +170,7 @@ class ForceField(torch.nn.Module):
                 coords, atom_number[independent_mask]))
         atom_pairs = torch.cat(atom_pairs, dim=0)
 
-        return coords, partners_final, fake_atoms, atom_pairs
+        return coords, partners_final, fake_atoms, atom_pairs, info_tensors
 
     def _calculate_angles(self, coords, angle_indices):
         """Calculates torsion angles."""
@@ -175,6 +200,7 @@ class ForceField(torch.nn.Module):
             partners=partners_final, alternative_mask=alternative_mask, facc=facc
         )
         residue_disulfide, atom_disulfide, disulfide_network = disulfide_net(disulfide_data)
+        residue_disulfide = torch.nan_to_num(residue_disulfide, posinf=1e6, neginf=-1e6)
 
         hbond_net = HBondNet(
             dev=self.device, donor=self.donor, acceptor=self.acceptor,
@@ -232,7 +258,7 @@ class ForceField(torch.nn.Module):
         if verbose:
             print("Verbose mode is on. Energy calculation started.")
 
-        coords, partners_final, fake_atoms, atom_pairs = self._prepare_tensors(coordinates, info_tensors)
+        coords, partners_final, fake_atoms, atom_pairs, info_tensors = self._prepare_tensors(coordinates, info_tensors)
         energies = self._calculate_energies(coords, partners_final, fake_atoms, atom_pairs, info_tensors)
 
         hbonds = energies["hbond_sc"] + energies["hbond_mc"]
