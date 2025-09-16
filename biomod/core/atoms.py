@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from .math import rotation_matrix
 from .constants import PERIODIC_TABLE, ATOMIC_NUMBER, COVALENT_RADII, METALS
 
@@ -328,7 +329,8 @@ class Atom:
         v3 = p4 - p3
         n1 = np.cross(v1, v2)
         n2 = np.cross(v2, v3)
-        angle = np.degrees(np.arctan2(np.dot(v1, n2), np.dot(n1, n2)))
+        v2_norm = np.linalg.norm(v2)
+        angle = np.degrees(math.atan2(np.dot(v1, n2) * v2_norm, np.dot(n1, n2)))
         return angle
 
 
